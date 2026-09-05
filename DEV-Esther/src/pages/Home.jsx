@@ -4,7 +4,7 @@ import './Home.css'
 import HeroScene from '../components/animations/HeroScene'
 import modelBag from '../assets/images/model-bag.jpg'
 import modelBox from '../assets/images/model-box.jpg'
-import modelTurn from '../assets/images/model-turn.jpg'
+import gifVideo from '../assets/videos/Gif.mp4'
 
 /* ---- Animation variants ---- */
 const fadeUp = {
@@ -208,7 +208,7 @@ export default function Home() {
           viewport={{ once: true }}
           transition={{ duration: 1.4 }}
         >
-          <img src={modelTurn} alt="EST'HAIR & CO." className="editorial__fullscreen-img" />
+          <video src={gifVideo} autoPlay loop muted playsInline className="editorial__fullscreen-img" />
           <div className="editorial__fullscreen-overlay">
             <motion.div
               className="editorial__fullscreen-content"
@@ -297,7 +297,7 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <img src={modelTurn} alt="EST'HAIR & CO." className="editorial__banner-img" />
+            <video src={gifVideo} autoPlay loop muted playsInline className="editorial__banner-img" />
             <div className="editorial__banner-overlay" />
           </motion.div>
           <motion.div
