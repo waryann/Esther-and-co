@@ -12,7 +12,6 @@ export default function AdminProducts() {
     is_bestseller: false, is_new: true, on_sale: false, sale_price: ''
   })
   const [uploading, setUploading] = useState(false)
-  const [autoRemoveBg, setAutoRemoveBg] = useState(true)
 
   const fetchProducts = () => {
     setLoading(true)
@@ -99,7 +98,6 @@ export default function AdminProducts() {
     setUploading(true)
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('remove_bg', autoRemoveBg ? 'true' : 'false')
 
     axios.post('/api/admin/upload', formData, {
       headers: {
@@ -201,26 +199,17 @@ export default function AdminProducts() {
                       disabled={uploading}
                     />
                     <label htmlFor="product-image-upload" className={`admin-upload-label ${uploading ? 'uploading' : ''}`}>
-                      {uploading ? "⏳ Traitement / Détourage par l'IA..." : "📸 Glisser ou Choisir une photo"}
+                      {uploading ? "⏳ Téléversement en cours..." : "📸 Glisser ou Choisir une photo"}
                     </label>
 
                     {newProduct.image_url && (
                       <div className="admin-upload-preview">
                         <img src={newProduct.image_url} alt="Aperçu" className="preview-img" />
-                        <span className="preview-badge">Aperçu détouré</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <label className="admin-checkbox">
-                  <input 
-                    type="checkbox" 
-                    checked={autoRemoveBg} 
-                    onChange={e => setAutoRemoveBg(e.target.checked)} 
-                  />
-                  Détourer automatiquement la photo (fond transparent uniforme)
-                </label>
 
                 <div className="admin-form__row" style={{ gap: '2rem', marginBottom: '1rem' }}>
                   <label className="admin-checkbox">
