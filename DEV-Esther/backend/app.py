@@ -9,7 +9,7 @@ Architecture :
   - CORS activé pour permettre au front React (Vite port 5173) de communiquer.
 """
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from backend.config import config_by_name
 from backend.extensions import db, login_manager, cors
 
@@ -25,7 +25,7 @@ def create_app(config_name: str = "default") -> Flask:
         L'instance Flask configurée et prête à démarrer.
     """
     dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'dist'))
-    app = Flask(__name__, static_folder=dist_dir, static_url_path='/')
+    app = Flask(__name__, static_folder=dist_dir, static_url_path='/assets-static')
 
     # --- Chargement de la configuration ---
     app.config.from_object(config_by_name[config_name])
@@ -79,10 +79,10 @@ def create_app(config_name: str = "default") -> Flask:
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def serve_frontend(path):
-        if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-            return app.send_static_file(path)
+        if path != "" and os.path.exists(os.path.join(dist_dir, path)):
+            return send_from_directory(dist_dir, path)
         else:
-            return app.send_static_file("index.html")
+            return send_from_directory(dist_dir, "index.html")
 
     # --- Gestionnaire d'erreurs global ---
     @app.errorhandler(404)
