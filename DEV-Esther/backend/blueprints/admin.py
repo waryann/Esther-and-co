@@ -243,6 +243,10 @@ def update_product(product_id):
         product.base_price = float(data["base_price"])
     if "description" in data:
         product.description = data["description"]
+    if "category" in data:
+        product.category = data["category"]
+    if "image_url" in data:
+        product.image_url = data["image_url"]
     if "is_active" in data:
         product.is_active = bool(data["is_active"])
     if "is_featured" in data:
