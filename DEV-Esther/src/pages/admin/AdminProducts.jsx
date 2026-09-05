@@ -5,8 +5,8 @@ import axios from 'axios'
 export default function AdminProducts() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
   const [newProduct, setNewProduct] = useState({
     name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
     is_bestseller: false, is_new: true, on_sale: false, sale_price: ''
@@ -119,27 +119,56 @@ export default function AdminProducts() {
     })
   }
 
-  const createProduct = () => {
+  const saveProduct = () => {
     if (!newProduct.name || !newProduct.base_price) return
-    axios.post('/api/admin/products', {
+    
+    const payload = {
       ...newProduct,
       base_price: parseFloat(newProduct.base_price),
       sale_price: newProduct.sale_price ? parseFloat(newProduct.sale_price) : null
-    }).then(() => {
+    }
+
+    const req = editingProduct 
+      ? axios.put(`/api/admin/products/${editingProduct.id}`, payload)
+      : axios.post('/api/admin/products', payload)
+
+    req.then(() => {
       fetchProducts()
-      setShowAddForm(false)
-      setNewProduct({
-        name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
-        is_bestseller: false, is_new: true, on_sale: false, sale_price: ''
-      })
-    }).catch(() => alert('Erreur lors de la création'))
+      closeForm()
+    }).catch(() => alert('Erreur lors de la sauvegarde'))
+  }
+
+  const openEditForm = (product) => {
+    setEditingProduct(product)
+    setNewProduct({
+      name: product.name || '',
+      description: product.description || '',
+      base_price: product.base_price || '',
+      category: product.category || 'wig',
+      is_featured: product.is_featured || false,
+      image_url: product.image_url || '',
+      is_bestseller: product.is_bestseller || false,
+      is_new: product.is_new || false,
+      on_sale: product.on_sale || false,
+      sale_price: product.sale_price || ''
+    })
+    setShowAddForm(true)
+  }
+
+  const closeForm = () => {
+    setShowAddForm(false)
+    setEditingProduct(null)
+    setNewProduct({
+      name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
+      is_bestseller: false, is_new: true, on_sale: false, sale_price: ''
+    })
   }
 
   return (
     <div className="admin-page">
       <div className="admin-page__header">
         <h1 className="admin-page__title font-serif">Produits & Stock</h1>
-        <button className="btn btn-gold" onClick={() => setShowAddForm(true)}>
+        <button className="btn btn-gold" onClick={() => { setEditingProduct(null); setShowAddForm(true); }}>
           + Nouveau produit
         </button>
       </div>
@@ -157,8 +186,8 @@ export default function AdminProducts() {
               initial={{ scale: 0.9 }} animate={{ scale: 1 }}
               onClick={e => e.stopPropagation()}
             >
-              <button className="admin-modal__close" onClick={() => setShowAddForm(false)}>✕</button>
-              <h3 className="font-serif">Nouveau produit</h3>
+              <button className="admin-modal__close" onClick={closeForm}>✕</button>
+              <h3 className="font-serif">{editingProduct ? "Modifier le produit" : "Nouveau produit"}</h3>
 
               <div className="admin-form">
                 <div className="form-group">
@@ -245,8 +274,8 @@ export default function AdminProducts() {
                     onChange={e => setNewProduct({...newProduct, is_featured: e.target.checked})} />
                   Mettre en avant sur la Home (Featured)
                 </label>
-                <button className="btn btn-primary" onClick={createProduct} disabled={uploading}>
-                  {uploading ? "Veuillez patienter..." : "Créer le produit"}
+                <button className="btn btn-primary" onClick={saveProduct} disabled={uploading}>
+                  {uploading ? "Veuillez patienter..." : (editingProduct ? "Enregistrer les modifications" : "Créer le produit")}
                 </button>
               </div>
             </motion.div>
@@ -296,6 +325,13 @@ export default function AdminProducts() {
                 </div>
 
                 <div className="product-admin-card__actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <button
+                    className="admin-toggle"
+                    style={{ backgroundColor: 'var(--grey-800)', border: '1px solid var(--grey-600)' }}
+                    onClick={() => openEditForm(product)}
+                  >
+                    ✏️ Modifier infos
+                  </button>
                   <button
                     className={`admin-toggle ${product.is_new ? 'active' : ''}`}
                     onClick={() => toggleNew(product)}

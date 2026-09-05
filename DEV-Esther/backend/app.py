@@ -75,6 +75,11 @@ def create_app(config_name: str = "default") -> Flask:
             "version": "1.0.0",
         }), 200
 
+    # --- Route pour servir les fichiers uploadés (photos produits) ---
+    @app.route("/static/uploads/<path:filename>")
+    def serve_uploads(filename):
+        return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
     # --- Route pour servir le frontend React ---
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
