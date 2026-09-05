@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import './Home.css'
 import HeroScene from '../components/animations/HeroScene'
@@ -97,6 +97,19 @@ export default function Home() {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
+
+  const vidRef1 = useRef(null)
+  const vidRef2 = useRef(null)
+
+  useEffect(() => {
+    [vidRef1, vidRef2].forEach(ref => {
+      if (ref.current) {
+        ref.current.defaultMuted = true;
+        ref.current.muted = true;
+        ref.current.play().catch(() => {});
+      }
+    });
+  }, []);
 
   const products = [
     { name: 'Lace Front Straight', category: 'Perruque lace front', price: '180', tag: 'Bestseller' },
@@ -208,7 +221,7 @@ export default function Home() {
           viewport={{ once: true }}
           transition={{ duration: 1.4 }}
         >
-          <video src={gifVideo} autoPlay loop muted playsInline className="editorial__fullscreen-img" />
+          <video ref={vidRef1} src={gifVideo} autoPlay loop muted playsInline controls={false} className="editorial__fullscreen-img" />
           <div className="editorial__fullscreen-overlay">
             <motion.div
               className="editorial__fullscreen-content"
@@ -297,7 +310,7 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <video src={gifVideo} autoPlay loop muted playsInline className="editorial__banner-img" />
+            <video ref={vidRef2} src={gifVideo} autoPlay loop muted playsInline controls={false} className="editorial__banner-img" />
             <div className="editorial__banner-overlay" />
           </motion.div>
           <motion.div
