@@ -28,3 +28,4 @@ urllib3==2.7.0
 Werkzeug==3.0.3
 yarl==1.24.5
 gunicorn==21.2.0
+psycopg2-binary==2.9.9

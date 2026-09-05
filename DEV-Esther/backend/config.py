@@ -14,10 +14,14 @@ class Config:
     # BASE_DIR = backend/, donc instance/ est bien dans backend/instance/
     INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
     os.makedirs(INSTANCE_DIR, exist_ok=True)  # Crée le dossier si absent
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
+    database_url = os.environ.get(
         "DATABASE_URL",
         f"sqlite:///{os.path.join(INSTANCE_DIR, 'esthair.db')}"
     )
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    
+    SQLALCHEMY_DATABASE_URI = database_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # --- CORS (autorise le front React sur port 5173, Flask sur 5003) ---
