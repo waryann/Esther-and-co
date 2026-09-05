@@ -1,5 +1,6 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
+import axios from 'axios'
 import './Home.css'
 import HeroScene from '../components/animations/HeroScene'
 import modelBag from '../assets/images/model-bag.jpg'
@@ -43,7 +44,7 @@ function Reveal({ children, className = '', delay = 0 }) {
 }
 
 /* ---- Product card with 3D tilt ---- */
-function ProductCard({ name, category, price, tag, index }) {
+function ProductCard({ id, name, category, base_price, tag, image_url, index }) {
   const ref = useRef(null)
 
   const handleMouseMove = (e) => {
@@ -73,20 +74,25 @@ function ProductCard({ name, category, price, tag, index }) {
     >
       {tag && <span className="product-card__tag">{tag}</span>}
       <div className="product-card__image">
-        <div className="product-card__image-placeholder" />
+        {image_url ? (
+          <img src={image_url} alt={name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+        ) : (
+          <div className="product-card__image-placeholder" />
+        )}
       </div>
       <div className="product-card__info">
-        <p className="product-card__category">{category}</p>
+        <p className="product-card__category">{category === 'wig' ? 'Perruque' : 'Soin'}</p>
         <h3 className="product-card__name">{name}</h3>
-        <p className="product-card__price">À partir de {price}€</p>
+        <p className="product-card__price">À partir de {base_price}€</p>
       </div>
-      <motion.button
+      <motion.a
+        href={`/shop/${id}`}
         className="product-card__cta"
         whileHover={{ x: 6 }}
         transition={{ type: 'spring', stiffness: 400 }}
       >
         Découvrir →
-      </motion.button>
+      </motion.a>
     </motion.div>
   )
 }
@@ -99,12 +105,18 @@ export default function Home() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
 
-  const products = [
-    { name: 'Lace Front Straight', category: 'Perruque lace front', price: '180', tag: 'Bestseller' },
-    { name: '360 Body Wave', category: 'Perruque 360 lace', price: '250', tag: null },
-    { name: 'Full Lace Curly', category: 'Perruque full lace', price: '320', tag: 'Nouveau' },
-    { name: 'Ombre Blonde Wave', category: 'Perruque lace front', price: '210', tag: null },
-  ]
+  const [featuredProducts, setFeaturedProducts] = useState([])
+
+  useEffect(() => {
+    axios.get('/api/products/')
+      .then(res => {
+        // Prendre les produits mis en avant (ou les premiers s'il n'y en a pas)
+        let featured = res.data.filter(p => p.is_featured)
+        if (featured.length === 0) featured = res.data.slice(0, 4)
+        setFeaturedProducts(featured.slice(0, 4))
+      })
+      .catch(err => console.error("Erreur chargement produits home:", err))
+  }, [])
 
   return (
     <main className="home">
@@ -351,8 +363,13 @@ export default function Home() {
           </Reveal>
 
           <div className="collection__grid">
-            {products.map((p, i) => (
-              <ProductCard key={p.name} {...p} index={i} />
+            {featuredProducts.map((p, i) => (
+              <ProductCard 
+                key={p.id} 
+                {...p} 
+                tag={p.is_bestseller ? 'Bestseller' : p.is_new ? 'Nouveau' : p.on_sale ? 'En Solde' : null} 
+                index={i} 
+              />
             ))}
           </div>
 

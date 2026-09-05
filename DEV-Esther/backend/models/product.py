@@ -44,6 +44,7 @@ class Product(db.Model):
             "base_price": self.base_price,
             "category": self.category,
             "image_url": self.image_url,
+            "is_active": self.is_active,
             "is_featured": self.is_featured,
             "is_bestseller": self.is_bestseller,
             "is_new": self.is_new,
