@@ -1,0 +1,264 @@
+/* =====================================================
+   Product Detail Page — EST'HAIR & CO.
+   ===================================================== */
+
+.product-detail-page {
+  background: var(--black);
+  min-height: 100vh;
+  padding-top: 120px;
+  padding-bottom: 5rem;
+}
+
+.product-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* --- Back navigation --- */
+.back-to-shop {
+  display: inline-block;
+  color: var(--grey-400);
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+  transition: color 0.2s;
+}
+
+.back-to-shop:hover {
+  color: var(--gold);
+}
+
+/* --- Layout --- */
+.product-detail-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+/* --- Gallery Wrap --- */
+.product-detail-gallery {
+  position: sticky;
+  top: 120px;
+}
+
+.product-detail-image-wrap {
+  aspect-ratio: 4/5;
+  background: radial-gradient(circle, #22201d 0%, #0d0d0d 100%); /* Fond de studio uniforme */
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+}
+
+.product-detail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* --- Product Infos --- */
+.product-detail-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-detail-category {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+
+.product-detail-title {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.product-detail-price {
+  font-size: 2rem;
+  color: var(--white);
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 1.5rem;
+}
+
+/* --- Descriptions --- */
+.product-detail-desc-block {
+  margin-bottom: 2.5rem;
+}
+
+.section-subtitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--grey-300);
+  margin-bottom: 0.8rem;
+}
+
+.product-detail-desc {
+  font-size: 0.95rem;
+  color: var(--grey-100);
+  line-height: 1.6;
+}
+
+/* --- Options Selectors --- */
+.product-detail-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  margin-bottom: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2rem 0;
+}
+
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.option-group label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--grey-400);
+}
+
+.option-selectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.option-selector-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  padding: 0.6rem 1.2rem;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 2px;
+}
+
+.option-selector-btn:hover {
+  border-color: var(--white);
+}
+
+.option-selector-btn.active {
+  background: var(--white);
+  color: var(--black);
+  border-color: var(--white);
+  font-weight: 500;
+}
+
+/* --- Purchase Section --- */
+.purchase-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.quantity-selector-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quantity-selector-wrap label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--grey-400);
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: fit-content;
+  background: #0d0d0d;
+}
+
+.quantity-selector button {
+  background: transparent;
+  border: none;
+  color: var(--white);
+  width: 45px;
+  height: 45px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.quantity-selector button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.quantity-selector button:disabled {
+  color: var(--grey-600);
+  cursor: not-allowed;
+}
+
+.quantity-selector span {
+  width: 50px;
+  text-align: center;
+  font-family: var(--font-sans);
+  color: var(--white);
+  font-size: 0.95rem;
+}
+
+.stock-status-info {
+  font-size: 0.85rem;
+}
+
+.stock-in {
+  color: #32c864;
+}
+
+.stock-out {
+  color: #ff5050;
+}
+
+.purchase-btn {
+  padding: 1.2rem 2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* --- Loading & Error --- */
+.product-detail-error {
+  text-align: center;
+  padding: 10rem 2rem;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.product-detail-error h2 {
+  font-size: 2rem;
+  font-weight: 300;
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .product-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .product-detail-gallery {
+    position: relative;
+    top: 0;
+  }
+}

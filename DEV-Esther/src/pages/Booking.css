@@ -1,0 +1,373 @@
+/* =====================================================
+   Booking Page — EST'HAIR & CO.
+   ===================================================== */
+
+.booking-page {
+  min-height: 100vh;
+  padding-top: 120px;
+  padding-bottom: var(--space-xl);
+  background: var(--black);
+}
+
+.booking__container {
+  max-width: 1000px;
+}
+
+/* --- Header & Progress --- */
+.booking__header {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.booking__title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 300;
+  color: var(--white);
+  margin: var(--space-sm) 0 var(--space-md);
+}
+
+.booking__progress {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: var(--space-md);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: var(--space-md);
+}
+
+.booking__step {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-500);
+  transition: color 0.3s;
+}
+
+.booking__step.active {
+  color: var(--gold);
+}
+
+/* --- Content Area --- */
+.booking__content {
+  background: var(--grey-900);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: var(--space-lg);
+  min-height: 400px;
+}
+
+.booking__layout-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+/* --- STEP 1: Services Grid --- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.service-card {
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: var(--space-md);
+  cursor: pointer;
+  transition: all 0.3s;
+  background: transparent;
+}
+
+.service-card:hover {
+  border-color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.02);
+}
+
+.service-card.selected {
+  border-color: var(--gold);
+  background: rgba(201, 169, 110, 0.05);
+}
+
+.service-card__title {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+}
+
+.service-card__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--grey-300);
+}
+
+.service-card__price {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* --- STEP 2: Calendar & Slots --- */
+.booking__calendar-wrap {
+  border-right: 1px solid rgba(255,255,255,0.1);
+  padding-right: var(--space-lg);
+}
+
+.booking__slots-wrap {
+  padding-left: var(--space-md);
+}
+
+.booking__slots-title {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.slot-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--white);
+  padding: 0.8rem 0;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.slot-btn:hover {
+  border-color: var(--white);
+}
+
+.slot-btn.selected {
+  background: var(--gold);
+  color: var(--black);
+  border-color: var(--gold);
+  font-weight: 600;
+}
+
+.no-slots {
+  color: var(--grey-300);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* --- React Calendar Custom Overrides --- */
+.custom-calendar {
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  font-family: var(--font-sans) !important;
+  color: var(--white) !important;
+}
+
+.react-calendar__navigation button {
+  color: var(--gold) !important;
+  font-size: 1.2rem;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: rgba(255,255,255,0.05) !important;
+}
+
+.react-calendar__month-view__weekdays {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--grey-300);
+}
+
+.react-calendar__month-view__days__day {
+  color: var(--white) !important;
+  padding: 1em 0.5em !important;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: var(--grey-500) !important;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: rgba(255,255,255,0.1) !important;
+  border-radius: 2px;
+}
+
+.react-calendar__tile--active {
+  background: var(--gold) !important;
+  color: var(--black) !important;
+  font-weight: bold;
+  border-radius: 2px;
+}
+
+.react-calendar__tile--now {
+  background: rgba(201, 169, 110, 0.2) !important;
+}
+
+/* --- STEP 3: Summary & Form --- */
+.booking__summary h3,
+.booking__form h3 {
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+}
+
+.summary-card {
+  background: rgba(0,0,0,0.3);
+  padding: 1.5rem;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.summary-card p {
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem;
+  color: var(--grey-100);
+}
+
+.summary-card strong {
+  color: var(--white);
+  font-weight: 500;
+}
+
+.summary-deposit {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.summary-deposit p {
+  color: var(--gold);
+  font-size: 1.1rem;
+}
+
+.summary-deposit span {
+  font-size: 0.75rem;
+  color: var(--grey-500);
+}
+
+.booking__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-300);
+}
+
+.form-group input,
+.form-group textarea {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--white);
+  padding: 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--gold);
+}
+
+.booking__reminder {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.6;
+  background: rgba(255,255,255,0.03);
+  padding: 1rem;
+  border-left: 2px solid var(--gold);
+}
+
+/* --- Actions --- */
+.booking__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: var(--space-lg);
+}
+
+/* --- Success Screen --- */
+.booking__success {
+  text-align: center;
+  max-width: 600px;
+  margin: 4rem auto;
+  padding: 4rem 2rem;
+  background: var(--grey-900);
+  border: 1px solid var(--gold);
+}
+
+.booking__success-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--gold);
+  color: var(--black);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 2rem;
+}
+
+.booking__success h1 {
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+}
+
+.booking__success p {
+  color: var(--grey-100);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.booking__success-sub {
+  color: var(--grey-300) !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 3rem !important;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+  .booking__layout-split {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  .booking__calendar-wrap {
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-right: 0;
+    padding-bottom: var(--space-md);
+  }
+  .booking__slots-wrap {
+    padding-left: 0;
+  }
+  .booking__progress {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+}

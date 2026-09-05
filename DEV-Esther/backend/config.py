@@ -1,0 +1,52 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+
+class Config:
+    # --- Sécurité ---
+    SECRET_KEY = os.environ.get("SECRET_KEY", "esthair-dev-secret-key-change-in-prod")
+
+    # --- Base de données SQLite ---
+    # BASE_DIR = backend/, donc instance/ est bien dans backend/instance/
+    INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
+    os.makedirs(INSTANCE_DIR, exist_ok=True)  # Crée le dossier si absent
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URL",
+        f"sqlite:///{os.path.join(INSTANCE_DIR, 'esthair.db')}"
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # --- CORS (autorise le front React sur port 5173, Flask sur 5003) ---
+    CORS_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+    # --- Acompte par défaut (%) ---
+    DEFAULT_DEPOSIT_PERCENT = 30
+
+    # --- Upload photos produits ---
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+
+
+    # --- Configuration Twilio (SMS) ---
+    TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
+    TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+
+class ProductionConfig(Config):
+    DEBUG = False
+
+
+config_by_name = {
+    "development": DevelopmentConfig,
+    "production": ProductionConfig,
+    "default": DevelopmentConfig,
+}
