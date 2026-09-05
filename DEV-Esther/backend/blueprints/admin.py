@@ -335,6 +335,8 @@ def upload_file():
     
     try:
         detoured = False
+        
+        # S'il y a un détourage à faire (optionnel, on garde la logique de fallback)
         if remove_bg:
             try:
                 from rembg import remove
@@ -343,20 +345,32 @@ def upload_file():
                 input_data = file.read()
                 output_data = remove(input_data)
                 
+                # Sauvegarder localement d'abord pour avoir un fichier à uploader
                 img = Image.open(io.BytesIO(output_data))
                 img.save(upload_path, "PNG")
                 detoured = True
             except Exception as bg_err:
                 current_app.logger.warning(f"Échec détourage (fallback vers image originale) : {bg_err}")
                 file.seek(0)
-                # Changer le nom de fichier pour correspondre à l'extension originale
                 unique_filename = f"{uuid.uuid4().hex}.{ext}"
                 upload_path = os.path.join(current_app.config["UPLOAD_FOLDER"], unique_filename)
                 file.save(upload_path)
         else:
             file.save(upload_path)
             
-        image_url = f"/static/uploads/{unique_filename}"
+        # Si Cloudinary est configuré, uploader l'image vers Cloudinary
+        if current_app.config.get("CLOUDINARY_CLOUD_NAME"):
+            import cloudinary.uploader
+            upload_result = cloudinary.uploader.upload(upload_path, folder="esthair")
+            image_url = upload_result.get("secure_url")
+            # Nettoyer le fichier local qui n'est plus nécessaire
+            try:
+                os.remove(upload_path)
+            except Exception:
+                pass
+        else:
+            image_url = f"/static/uploads/{unique_filename}"
+            
         return jsonify({
             "message": "Fichier téléversé avec succès",
             "image_url": image_url,

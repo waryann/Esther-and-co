@@ -12,6 +12,9 @@ import os
 from flask import Flask, jsonify, send_from_directory
 from backend.config import config_by_name
 from backend.extensions import db, login_manager, cors
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 
 def create_app(config_name: str = "default") -> Flask:
@@ -36,6 +39,15 @@ def create_app(config_name: str = "default") -> Flask:
     cors.init_app(app, resources={
         r"/api/*": {"origins": app.config["CORS_ORIGINS"]}
     })
+
+    # --- Initialisation Cloudinary ---
+    if app.config.get("CLOUDINARY_CLOUD_NAME"):
+        cloudinary.config(
+            cloud_name=app.config["CLOUDINARY_CLOUD_NAME"],
+            api_key=app.config["CLOUDINARY_API_KEY"],
+            api_secret=app.config["CLOUDINARY_API_SECRET"],
+            secure=True
+        )
 
     # --- Chargement de l'utilisateur pour Flask-Login ---
     from backend.models.user import User
