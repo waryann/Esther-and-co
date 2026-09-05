@@ -387,6 +387,8 @@
   padding: 2.5rem;
   width: 100%;
   max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
   position: relative;
 }
 
