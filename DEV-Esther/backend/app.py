@@ -49,7 +49,7 @@ def create_app(config_name: str = "default") -> Flask:
             secure=True
         )
 
-    # --- Chargement de l'utilisateur pour Flask-Login ---
+    # --- Chargement de l'utilisateur pour Flask-Login --- tu me dois des sou
     from backend.models.user import User
 
     @login_manager.user_loader
