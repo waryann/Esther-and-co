@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 import './Home.css'
 import HeroScene from '../components/animations/HeroScene'
 import modelBag from '../assets/images/model-bag.jpg'
@@ -48,8 +49,9 @@ function Reveal({ children, className = '', delay = 0 }) {
 }
 
 /* ---- Product card with 3D tilt ---- */
-function ProductCard({ name, category, price, tag, image_url, index }) {
+function ProductCard({ id, name, category, price, tag, image_url, index }) {
   const ref = useRef(null)
+  const navigate = useNavigate()
 
   const handleMouseMove = (e) => {
     const el = ref.current
@@ -73,8 +75,10 @@ function ProductCard({ name, category, price, tag, image_url, index }) {
       viewport={{ once: true, margin: '-60px' }}
       custom={index * 0.15}
       ref={ref}
+      onClick={() => navigate(`/product/${id}`)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      style={{ cursor: 'pointer' }}
     >
       {tag && <span className="product-card__tag">{tag}</span>}
       <div className="product-card__image">
@@ -385,6 +389,7 @@ export default function Home() {
             {wigs.map((p, i) => (
               <ProductCard 
                 key={p.id}
+                id={p.id}
                 name={p.name}
                 category={p.category === 'wig' ? 'Perruque' : 'Entretien'}
                 price={p.base_price}
@@ -448,7 +453,11 @@ export default function Home() {
           <div className="care__grid">
             {cares.map((item, i) => (
               <Reveal key={item.id} delay={i * 0.1}>
-                <div className="care-card">
+                <div 
+                  className="care-card"
+                  onClick={() => window.location.href = `/product/${item.id}`}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className="care-card__image">
                     {item.image_url && (
                       <img src={item.image_url} alt={item.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
