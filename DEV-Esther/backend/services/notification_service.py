@@ -49,13 +49,55 @@ def send_wig_deposit_reminder(appointment) -> bool:
     return success
 
 
+def send_email(to_email: str, subject: str, html_body: str) -> bool:
+    import resend
+    api_key = current_app.config.get("RESEND_API_KEY")
+    from_email = current_app.config.get("COMPANY_EMAIL", "onboarding@resend.dev")
+    
+    if not api_key:
+        print(f"[SIMULATION EMAIL] À : {to_email} | Sujet : {subject}")
+        return True
+
+    resend.api_key = api_key
+    try:
+        r = resend.Emails.send({
+            "from": from_email,
+            "to": to_email,
+            "subject": subject,
+            "html": html_body
+        })
+        logger.info(f"Email envoyé avec succès: {r}")
+        return True
+    except Exception as e:
+        logger.error(f"Erreur lors de l'envoi de l'email : {e}")
+        return False
+
 def send_appointment_confirmation(appointment) -> bool:
     """
-    Envoie une confirmation de RDV au client.
+    Envoie une confirmation de RDV au client (SMS et Email).
     """
     client = appointment.client
-    message = f"EST'HAIR & CO : Votre RDV du {appointment.scheduled_at.strftime('%d/%m/%Y à %H:%M')} est confirmé. Au plaisir de vous recevoir !"
-    return send_sms(client.phone, message)
+    date_str = appointment.scheduled_at.strftime('%d/%m/%Y à %H:%M')
+    
+    # Envoi du SMS
+    message = f"EST'HAIR & CO : Votre RDV du {date_str} est confirmé. Au plaisir de vous recevoir !"
+    send_sms(client.phone, message)
+    
+    # Envoi de l'email
+    subject = "Confirmation de votre réservation - EST'HAIR & CO"
+    html_body = f"""
+    <h2>Bonjour {client.first_name},</h2>
+    <p>Nous vous confirmons que votre acompte a bien été reçu.</p>
+    <p>Votre prestation <strong>{appointment.service.name}</strong> est confirmée pour le <strong>{date_str}</strong>.</p>
+    <br>
+    <p>Rappel : Votre perruque doit être déposée au salon 48h avant la prestation pour la customisation.</p>
+    <br>
+    <p>À très bientôt,</p>
+    <p>L'équipe EST'HAIR & CO</p>
+    """
+    send_email(client.email, subject, html_body)
+    
+    return True
 
 
 def send_deposit_reminder(appointment) -> bool:

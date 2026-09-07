@@ -31,3 +31,4 @@ gunicorn==21.2.0
 psycopg2-binary==2.9.9
 cloudinary==1.41.0
 stripe==11.0.0
+resend==2.1.0

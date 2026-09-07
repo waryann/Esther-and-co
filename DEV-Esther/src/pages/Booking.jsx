@@ -21,14 +21,18 @@ export default function Booking() {
   const [slots, setSlots] = useState([])
   const [selectedSlot, setSelectedSlot] = useState(null)
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
     headSize: '',
     notes: '',
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  // TODO: Prendre l'user connecté, on simule l'ID 1 pour le test
-  const userId = 1 
+  // L'utilisateur invité (plus besoin de userId fixe)
+  // const userId = 1 
 
   // Fetch slots when date or service changes
   useEffect(() => {
@@ -68,7 +72,10 @@ export default function Booking() {
       const scheduledAt = `${dateStr}T${selectedSlot}`
       
       const payload = {
-        user_id: userId,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
         service_id: selectedService.id,
         scheduled_at: scheduledAt,
         head_size: formData.headSize,
@@ -232,6 +239,52 @@ export default function Booking() {
                 <form className="booking__form" onSubmit={handleSubmit}>
                   <h3 className="font-serif">Vos informations pour la pose</h3>
                   
+                  <div className="form-group-row" style={{ display: 'flex', gap: '15px' }}>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Prénom *</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="Votre prénom"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Nom *</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="Votre nom"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group-row" style={{ display: 'flex', gap: '15px' }}>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Email *</label>
+                      <input 
+                        type="email" 
+                        required
+                        placeholder="votre@email.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Téléphone *</label>
+                      <input 
+                        type="tel" 
+                        required
+                        placeholder="04..."
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  
                   <div className="form-group">
                     <label>Tour de tête (en pouces/cm) - Optionnel</label>
                     <input 
@@ -281,7 +334,7 @@ export default function Booking() {
             <button 
               className="btn btn-primary" 
               onClick={handleSubmit}
-              disabled={loading}
+              disabled={loading || !formData.firstName || !formData.lastName || !formData.email || !formData.phone}
             >
               {loading ? 'Validation...' : 'Confirmer et Payer l\'acompte'}
             </button>

@@ -50,6 +50,10 @@ class Config:
     STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY")
     STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 
+    # --- Configuration Emails (Resend) ---
+    RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+    COMPANY_EMAIL = os.environ.get("COMPANY_EMAIL", "onboarding@resend.dev") # Par défaut l'email de test Resend
+
 class DevelopmentConfig(Config):
     DEBUG = True
 

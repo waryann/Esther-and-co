@@ -68,9 +68,30 @@ def create_appointment():
     except ValueError:
         return jsonify({"error": "Format de date invalide (YYYY-MM-DDTHH:MM)"}), 400
 
+    # Récupération ou Création de l'utilisateur "Invité"
+    email = data.get("email")
+    if not email:
+        return jsonify({"error": "L'email est requis"}), 400
+        
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        # Créer un compte invité
+        user = User(
+            email=email,
+            first_name=data.get("first_name", "Invité"),
+            last_name=data.get("last_name", ""),
+            phone=data.get("phone", ""),
+            role="client"
+        )
+        # On définit un mot de passe aléatoire par défaut
+        import secrets
+        user.set_password(secrets.token_urlsafe(16))
+        db.session.add(user)
+        db.session.flush() # Pour récupérer l'ID avant le commit
+        
     # Le RDV est créé en statut 'pending' (en attente de paiement)
     appointment = Appointment(
-        user_id=data["user_id"],
+        user_id=user.id,
         service_id=data["service_id"],
         scheduled_at=scheduled_at,
         head_size_at_booking=data["head_size"],
