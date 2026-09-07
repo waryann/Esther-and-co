@@ -71,12 +71,12 @@ def create_app(config_name: str = "default") -> Flask:
     app.register_blueprint(payments_bp)
     app.register_blueprint(admin_bp)
 
-    # --- Création des tables SQLite au premier démarrage ---
+    # --- Création des tables au premier démarrage ---
     with app.app_context():
         # Import des modèles pour que SQLAlchemy les découvre
         from backend.models import User, Product, ProductVariant, Service, Appointment, Order, OrderItem
         db.create_all()
-        print("✅ Base de données SQLite initialisée.")
+        print(f"✅ Base de données ({db.engine.url.drivername}) initialisée.")
 
     # --- Route de santé (health check) ---
     @app.route("/api/health")
