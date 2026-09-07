@@ -282,14 +282,34 @@ def update_product(product_id):
     if "variants" in data:
         from backend.models.product_variant import ProductVariant
         for v_data in data["variants"]:
-            variant = ProductVariant.query.get(v_data.get("id"))
-            if variant and variant.product_id == product_id:
-                if "stock_quantity" in v_data:
-                    variant.stock = int(v_data["stock_quantity"])
-                if "stock" in v_data:
-                    variant.stock = int(v_data["stock"])
-                if "price_modifier" in v_data:
-                    variant.price_modifier = float(v_data["price_modifier"])
+            if v_data.get("id"):
+                variant = ProductVariant.query.get(v_data.get("id"))
+                if variant and variant.product_id == product_id:
+                    if "stock_quantity" in v_data:
+                        variant.stock = int(v_data["stock_quantity"])
+                    if "stock" in v_data:
+                        variant.stock = int(v_data["stock"])
+                    if "price_modifier" in v_data:
+                        variant.price_modifier = float(v_data["price_modifier"])
+                    if "length" in v_data:
+                        variant.length = v_data["length"]
+                    if "density" in v_data:
+                        variant.density = v_data["density"]
+                    if "cap_type" in v_data:
+                        variant.cap_type = v_data["cap_type"]
+            else:
+                # C'est une nouvelle variante ajoutée lors de l'édition
+                new_variant = ProductVariant(
+                    product_id=product_id,
+                    length=v_data.get("length"),
+                    density=v_data.get("density"),
+                    cap_type=v_data.get("cap_type"),
+                    color=v_data.get("color"),
+                    texture=v_data.get("texture"),
+                    price_modifier=float(v_data.get("price_modifier", 0.0)),
+                    stock=int(v_data.get("stock", 0))
+                )
+                db.session.add(new_variant)
 
     db.session.commit()
     return jsonify({"message": "Produit mis à jour", "product": product.to_dict(include_variants=True)})

@@ -182,7 +182,7 @@ export default function AdminProducts() {
       is_new: product.is_new || false,
       on_sale: product.on_sale || false,
       sale_price: product.sale_price || '',
-      variants: [] // On modifie les variantes existantes via le tableau directement
+      variants: product.variants ? [...product.variants] : []
     })
     setShowAddForm(true)
   }
@@ -307,23 +307,21 @@ export default function AdminProducts() {
                   Mettre en avant sur la Home (Featured)
                 </label>
 
-                {!editingProduct && (
-                  <div className="admin-form__variants" style={{ marginTop: '2rem', borderTop: '1px solid var(--grey-800)', paddingTop: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                      <h4>Variantes Initiales</h4>
-                      <button className="btn btn-sm" onClick={addVariantToNewProduct}>+ Ajouter Variante</button>
-                    </div>
-                    {newProduct.variants.map((v, i) => (
-                      <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
-                        <input className="admin-input" placeholder="Longueur (ex: 18&quot;)" value={v.length} onChange={e => updateNewVariant(i, 'length', e.target.value)} style={{ width: '100px' }} />
-                        <input className="admin-input" placeholder="Densité" value={v.density} onChange={e => updateNewVariant(i, 'density', e.target.value)} style={{ width: '80px' }} />
-                        <input className="admin-input" placeholder="Bonnet" value={v.cap_type} onChange={e => updateNewVariant(i, 'cap_type', e.target.value)} style={{ width: '100px' }} />
-                        <input className="admin-input" type="number" placeholder="Stock" value={v.stock} onChange={e => updateNewVariant(i, 'stock', e.target.value)} style={{ width: '70px' }} />
-                        <button style={{ color: 'red', background: 'transparent', border: 'none', cursor: 'pointer' }} onClick={() => removeNewVariant(i)}>✖</button>
-                      </div>
-                    ))}
+                <div className="admin-form__variants" style={{ marginTop: '2rem', borderTop: '1px solid var(--grey-800)', paddingTop: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h4>Variantes</h4>
+                    <button className="btn btn-sm" onClick={addVariantToNewProduct}>+ Ajouter Variante</button>
                   </div>
-                )}
+                  {newProduct.variants.map((v, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                      <input className="admin-input" placeholder="Longueur (ex: 18&quot;)" value={v.length || ''} onChange={e => updateNewVariant(i, 'length', e.target.value)} style={{ width: '100px' }} />
+                      <input className="admin-input" placeholder="Densité" value={v.density || ''} onChange={e => updateNewVariant(i, 'density', e.target.value)} style={{ width: '80px' }} />
+                      <input className="admin-input" placeholder="Bonnet" value={v.cap_type || ''} onChange={e => updateNewVariant(i, 'cap_type', e.target.value)} style={{ width: '100px' }} />
+                      <input className="admin-input" type="number" placeholder="Stock" value={v.stock !== undefined ? v.stock : v.stock_quantity || 0} onChange={e => updateNewVariant(i, 'stock', e.target.value)} style={{ width: '70px' }} />
+                      <button style={{ color: 'red', background: 'transparent', border: 'none', cursor: 'pointer' }} onClick={() => removeNewVariant(i)}>✖</button>
+                    </div>
+                  ))}
+                </div>
 
                 <button className="btn btn-primary" onClick={saveProduct} disabled={uploading} style={{ marginTop: '2rem', width: '100%' }}>
                   {uploading ? "Veuillez patienter..." : (editingProduct ? "Enregistrer les modifications" : "Créer le produit")}
