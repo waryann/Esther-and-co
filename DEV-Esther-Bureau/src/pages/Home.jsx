@@ -1,5 +1,6 @@
-import { useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
+import axios from 'axios'
 import './Home.css'
 import HeroScene from '../components/animations/HeroScene'
 import modelBag from '../assets/images/model-bag.jpg'
@@ -43,7 +44,7 @@ function Reveal({ children, className = '', delay = 0 }) {
 }
 
 /* ---- Product card with 3D tilt ---- */
-function ProductCard({ name, category, price, tag, index }) {
+function ProductCard({ name, category, price, tag, image_url, index }) {
   const ref = useRef(null)
 
   const handleMouseMove = (e) => {
@@ -73,7 +74,11 @@ function ProductCard({ name, category, price, tag, index }) {
     >
       {tag && <span className="product-card__tag">{tag}</span>}
       <div className="product-card__image">
-        <div className="product-card__image-placeholder" />
+        {image_url ? (
+          <img src={image_url} alt={name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+        ) : (
+          <div className="product-card__image-placeholder" />
+        )}
       </div>
       <div className="product-card__info">
         <p className="product-card__category">{category}</p>
@@ -98,12 +103,13 @@ export default function Home() {
   const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
-  const products = [
-    { name: 'Lace Front Straight', category: 'Perruque lace front', price: '180', tag: 'Bestseller' },
-    { name: '360 Body Wave', category: 'Perruque 360 lace', price: '250', tag: null },
-    { name: 'Full Lace Curly', category: 'Perruque full lace', price: '320', tag: 'Nouveau' },
-    { name: 'Ombre Blonde Wave', category: 'Perruque lace front', price: '210', tag: null },
-  ]
+  const [products, setProducts] = useState([])
+
+  useEffect(() => {
+    axios.get('/api/products?category=wig')
+      .then(res => setProducts(res.data.slice(0, 4)))
+      .catch(err => console.error(err))
+  }, [])
 
   return (
     <main className="home">
@@ -342,24 +348,17 @@ export default function Home() {
       <section className="collection">
         <div className="container">
           <Reveal>
-            <p className="section-label">Notre sélection</p>
-            <div className="divider divider-left" />
-            <h2 className="collection__title font-serif">
-              La Collection
-            </h2>
-          </Reveal>
-
-          <div className="collection__grid">
-            {products.map((p, i) => (
-              <ProductCard key={p.name} {...p} index={i} />
-            ))}
-          </div>
-
-          <Reveal delay={0.3}>
-            <div className="collection__cta">
+            <div className="collection__header-row">
+              <div>
+                <p className="section-label">Notre sélection</p>
+                <div className="divider divider-left" />
+                <h2 className="collection__title font-serif">
+                  Nos Perruques
+                </h2>
+              </div>
               <motion.a
                 href="/shop"
-                className="btn btn-outline"
+                className="btn btn-gold"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -367,6 +366,20 @@ export default function Home() {
               </motion.a>
             </div>
           </Reveal>
+
+          <div className="collection__grid">
+            {products.map((p, i) => (
+              <ProductCard 
+                key={p.id}
+                name={p.name}
+                category={p.category === 'wig' ? 'Perruque' : 'Entretien'}
+                price={p.base_price}
+                tag={p.is_bestseller ? 'Bestseller' : (p.is_new ? 'Nouveau' : (p.on_sale ? 'Promo' : null))}
+                image_url={p.image_url}
+                index={i} 
+              />
+            ))}
+          </div>
         </div>
       </section>
 
