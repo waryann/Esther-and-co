@@ -16,6 +16,7 @@ app = create_app("production")
 
 with app.app_context():
     print("Vérification et création des tables de la base de données...")
+    db.drop_all()
     db.create_all()
     
     if User.query.first():
