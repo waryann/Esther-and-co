@@ -215,10 +215,13 @@ export default function Home() {
       {/* ======== EDITORIAL GALLERY ======== */}
       <section className="editorial">
 
-        {/* Ligne 1 — 4 GIFs côte à côte */}
+        {/* Ligne 1 — 4 GIFs côte à côte (2 sur mobile) */}
         <div className="editorial__gif-strip">
           <div className="editorial__gif-strip-overlay" />
-          {[gif1, gif2, gif3, gif4].map((gif, i) => (
+          {(typeof window !== 'undefined' && window.innerWidth <= 900
+            ? [gif1, gif3]
+            : [gif1, gif2, gif3, gif4]
+          ).map((gif, i) => (
             <motion.div
               key={i}
               className="editorial__gif-panel"
@@ -227,7 +230,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.9, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <img src={gif} alt={`EST'HAIR & CO. — Look ${i + 1}`} className="editorial__gif-img" />
+              <img src={gif} alt={`EST'HAIR & CO. — Look ${i + 1}`} className="editorial__gif-img" loading="lazy" />
             </motion.div>
           ))}
           <motion.div
@@ -237,8 +240,6 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.6 }}
           >
-            <p className="section-label">Editorial 2025</p>
-            <div className="divider" style={{ margin: '1rem auto' }} />
             <h2 className="editorial__fullscreen-title font-serif">
               La beauté<br /><em>en mouvement.</em>
             </h2>
