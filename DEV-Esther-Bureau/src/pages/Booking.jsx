@@ -8,6 +8,19 @@ import axios from 'axios'
 import 'react-calendar/dist/Calendar.css'
 import './Booking.css'
 
+// Images des types de boucles pour Flip Over
+import curl1 from '../assets/choix flip over/1.jpg'
+import curl2 from '../assets/choix flip over/2.jpg'
+import curl3 from '../assets/choix flip over/3.jpg'
+import curl4 from '../assets/choix flip over/4.jpg'
+
+const CURL_TYPES = [
+  { id: 'burmese', name: 'Burmese Curls', img: curl1 },
+  { id: 'pixie', name: 'Pixie Curls', img: curl2 },
+  { id: 'kinky', name: 'Kinky Curls', img: curl3 },
+  { id: 'bouncy', name: 'Bouncy Curls', img: curl4 },
+]
+
 function computeDeposit(service, totalPrice) {
   if (!service) return 0
   if (service.deposit_is_percent) return Math.round(totalPrice * service.deposit_value) / 100
@@ -31,6 +44,7 @@ export default function Booking() {
     headSize: '',
     notes: '',
   })
+  const [selectedCurlType, setSelectedCurlType] = useState(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
@@ -77,7 +91,10 @@ export default function Booking() {
     setSelectedVariant(null)
     setSelectedOptionIds([])
     setOptionPhotos({})
+    setSelectedCurlType(null)
   }
+
+  const isFlipOver = selectedService?.name?.toLowerCase().includes('flip')
 
   const toggleOption = (option) => {
     setSelectedOptionIds(prev =>
@@ -138,7 +155,8 @@ export default function Booking() {
         })),
         scheduled_at: scheduledAt,
         head_size: formData.headSize,
-        client_notes: formData.notes
+        curl_type: selectedCurlType || null,
+        client_notes: (selectedCurlType ? `Boucles choisies : ${CURL_TYPES.find(c => c.id === selectedCurlType)?.name || selectedCurlType}. ` : '') + formData.notes
       }
 
       const apptRes = await axios.post('/api/appointments/', payload)
@@ -278,6 +296,30 @@ export default function Booking() {
                     {!selectedService.is_pack && selectedService.conditions && (
                       <p className="booking__variant-note">ℹ️ {selectedService.conditions}</p>
                     )}
+                  </div>
+                )}
+
+                {/* Sélection des boucles pour Flip Over */}
+                {isFlipOver && (
+                  <div className="booking__sub-section">
+                    <h3 className="booking__sub-title font-serif">Choisissez vos boucles</h3>
+                    <div className="curl-grid">
+                      {CURL_TYPES.map(curl => (
+                        <div
+                          key={curl.id}
+                          className={`curl-card ${selectedCurlType === curl.id ? 'selected' : ''}`}
+                        >
+                          <img src={curl.img} alt={curl.name} className="curl-card__img" />
+                          <button
+                            type="button"
+                            className={`curl-card__btn ${selectedCurlType === curl.id ? 'selected' : ''}`}
+                            onClick={() => setSelectedCurlType(curl.id)}
+                          >
+                            {selectedCurlType === curl.id ? '✓ Sélectionné' : 'Choisir'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
