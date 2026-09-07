@@ -4,7 +4,8 @@ blueprints/payments.py — Routes de gestion des paiements et acomptes.
 /api/payments/order/<order_id>          POST → Payer une commande
 /api/payments/webhook                   POST → Webhook paiement (Stripe futur)
 """
-from flask import Blueprint, request, jsonify, os
+from flask import Blueprint, request, jsonify
+import os
 import stripe
 from backend.models.appointment import Appointment
 from backend.extensions import db
