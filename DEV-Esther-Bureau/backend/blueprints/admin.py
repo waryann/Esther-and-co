@@ -487,33 +487,32 @@ def upload_file():
     
     try:
         detoured = False
+        file_content = file.read()
+        
         if remove_bg:
             try:
                 from rembg import remove
-                from PIL import Image
-                
-                input_data = file.read()
-                output_data = remove(input_data)
-                
-                img = Image.open(io.BytesIO(output_data))
-                img.save(upload_path, "PNG")
+                file_content = remove(file_content)
                 detoured = True
             except Exception as bg_err:
                 current_app.logger.warning(f"Échec détourage (fallback vers image originale) : {bg_err}")
                 file.seek(0)
-                # Changer le nom de fichier pour correspondre à l'extension originale
-                unique_filename = f"{uuid.uuid4().hex}.{ext}"
-                upload_path = os.path.join(current_app.config["UPLOAD_FOLDER"], unique_filename)
-                file.save(upload_path)
-        else:
-            file.save(upload_path)
+                file_content = file.read()
+                
+        # --- Envoi sur Cloudinary ---
+        import cloudinary.uploader
+        upload_result = cloudinary.uploader.upload(
+            file_content,
+            folder="esthair_products",
+            resource_type="image"
+        )
+        image_url = upload_result.get("secure_url")
             
-        image_url = f"/static/uploads/{unique_filename}"
         return jsonify({
-            "message": "Fichier téléversé avec succès",
+            "message": "Fichier téléversé avec succès sur Cloudinary",
             "image_url": image_url,
             "detoured": detoured,
-            "warning": "Détourage automatique indisponible (machine hors-ligne pour charger le modèle d'IA). Image d'origine conservée." if (remove_bg and not detoured) else None
+            "warning": "Détourage automatique indisponible. Image d'origine conservée." if (remove_bg and not detoured) else None
         }), 200
         
     except Exception as e:

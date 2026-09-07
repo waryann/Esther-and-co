@@ -44,6 +44,15 @@ def create_app(config_name: str = "default") -> Flask:
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    # --- Configuration Cloudinary ---
+    import cloudinary
+    if os.environ.get("CLOUDINARY_CLOUD_NAME"):
+        cloudinary.config(
+            cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+            api_key=os.environ.get("CLOUDINARY_API_KEY"),
+            api_secret=os.environ.get("CLOUDINARY_API_SECRET")
+        )
+
     # --- Enregistrement des Blueprints (routes API) ---
     from backend.blueprints.auth import auth_bp
     from backend.blueprints.products import products_bp
