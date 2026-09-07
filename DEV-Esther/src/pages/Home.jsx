@@ -111,9 +111,11 @@ export default function Home() {
   useEffect(() => {
     axios.get('/api/products/')
       .then(res => {
-        // Prendre les produits mis en avant (ou les premiers s'il n'y en a pas)
-        let featured = res.data.filter(p => p.is_featured)
-        if (featured.length === 0) featured = res.data.slice(0, 4)
+        // Prendre uniquement les perruques pour la section "Nos perruques"
+        let wigs = res.data.filter(p => p.category === 'wig')
+        
+        let featured = wigs.filter(p => p.is_featured)
+        if (featured.length === 0) featured = wigs.slice(0, 4)
         setFeaturedProducts(featured.slice(0, 4))
         
         // Prendre les produits de soin
@@ -183,7 +185,7 @@ export default function Home() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Explorer la collection
+              Explorer nos perruques
             </motion.a>
             <motion.a
               href="/booking"
@@ -301,7 +303,7 @@ export default function Home() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Découvrir la collection
+              Découvrir nos perruques
             </motion.a>
           </motion.div>
         </div>
@@ -356,14 +358,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ======== COLLECTION ======== */}
+      {/* ======== WIGS SECTION ======== */}
       <section className="collection">
         <div className="container">
           <Reveal>
             <p className="section-label">Notre sélection</p>
             <div className="divider divider-left" />
             <h2 className="collection__title font-serif">
-              La Collection
+              Nos perruques
             </h2>
           </Reveal>
 
@@ -379,14 +381,15 @@ export default function Home() {
           </div>
 
           <Reveal delay={0.3}>
-            <div className="collection__cta">
+            <div className="collection__cta" style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}>
               <motion.a
                 href="/shop"
-                className="btn btn-outline"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="btn btn-gold"
+                style={{ padding: '1rem 3rem', fontSize: '1.1rem', letterSpacing: '2px', textTransform: 'uppercase' }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Voir toute la collection
+                Voir toutes nos perruques
               </motion.a>
             </div>
           </Reveal>
@@ -476,7 +479,7 @@ export default function Home() {
             <div className="footer__links-group">
               <p className="footer__group-title">Navigation</p>
               <ul>
-                <li><a href="/shop">Collection</a></li>
+                <li><a href="/shop">Nos Perruques</a></li>
                 <li><a href="/booking">Réservation</a></li>
                 <li><a href="/about">À Propos</a></li>
                 <li><a href="/contact">Contact</a></li>

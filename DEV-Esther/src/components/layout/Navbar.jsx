@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import './Navbar.css'
 
 const navLinks = [
-  { href: '/shop', label: 'Collection' },
+  { href: '/shop', label: 'Nos Perruques' },
   { href: '/booking', label: 'Réservation' },
   { href: '/about', label: 'À Propos' },
   { href: '/contact', label: 'Contact' },

@@ -62,7 +62,7 @@ export default function Shop() {
       {/* Hero Banner */}
       <section className="shop-hero">
         <div className="shop-hero__content">
-          <span className="shop-hero__subtitle font-sans">LA COLLECTION EST'HAIR</span>
+          <span className="shop-hero__subtitle font-sans">NOS PERRUQUES & SOINS</span>
           <h1 className="shop-hero__title font-serif">Des perruques d'exception & soins signature</h1>
           <p className="shop-hero__desc">
             Cheveux 100% naturels Remy Hair, customisés avec soin pour une indétectabilité totale.
