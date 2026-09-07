@@ -779,21 +779,33 @@
   .intro-card:last-child {
     border-bottom: none;
   }
-  .collection__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
+  .collection__grid,
   .care__grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin: 0 -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  
+  .collection__grid::-webkit-scrollbar,
+  .care__grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .collection__grid > *,
+  .care__grid > * {
+    flex: 0 0 75%;
+    scroll-snap-align: center;
+  }
+
   .footer__top {
     grid-template-columns: 1fr;
     gap: var(--space-md);
-  }
-}
-
-@media (max-width: 480px) {
-  .collection__grid {
-    grid-template-columns: 1fr;
   }
 }
