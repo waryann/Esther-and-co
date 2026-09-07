@@ -8,17 +8,11 @@ import axios from 'axios'
 import 'react-calendar/dist/Calendar.css'
 import './Booking.css'
 
-// Images des types de boucles pour Flip Over
-import curl1 from '../assets/choix flip over/1.jpg'
-import curl2 from '../assets/choix flip over/2.jpg'
-import curl3 from '../assets/choix flip over/3.jpg'
-import curl4 from '../assets/choix flip over/4.jpg'
-
 const CURL_TYPES = [
-  { id: 'burmese', name: 'Burmese Curls', img: curl1 },
-  { id: 'pixie', name: 'Pixie Curls', img: curl2 },
-  { id: 'kinky', name: 'Kinky Curls', img: curl3 },
-  { id: 'bouncy', name: 'Bouncy Curls', img: curl4 },
+  { id: 'burmese', name: 'Burmese Curls', img: '/choix-flip-over/1.jpg' },
+  { id: 'pixie', name: 'Pixie Curls', img: '/choix-flip-over/2.jpg' },
+  { id: 'kinky', name: 'Kinky Curls', img: '/choix-flip-over/3.jpg' },
+  { id: 'bouncy', name: 'Bouncy Curls', img: '/choix-flip-over/4.jpg' },
 ]
 
 function computeDeposit(service, totalPrice) {

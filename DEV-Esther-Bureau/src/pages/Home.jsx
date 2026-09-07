@@ -5,10 +5,10 @@ import './Home.css'
 import HeroScene from '../components/animations/HeroScene'
 import modelBag from '../assets/images/model-bag.jpg'
 import modelBox from '../assets/images/model-box.jpg'
-import gif1 from '../assets/gif/1.gif'
-import gif2 from '../assets/gif/2.gif'
-import gif3 from '../assets/gif/3.gif'
-import gif4 from '../assets/gif/4.gif'
+const gif1 = '/gif/1.gif'
+const gif2 = '/gif/2.gif'
+const gif3 = '/gif/3.gif'
+const gif4 = '/gif/4.gif'
 const modelTurn = modelBox
 
 /* ---- Animation variants ---- */
