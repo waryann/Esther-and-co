@@ -25,7 +25,7 @@ def create_app(config_name: str = "default") -> Flask:
         L'instance Flask configurée et prête à démarrer.
     """
     dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'dist'))
-    app = Flask(__name__, static_folder=dist_dir, static_url_path='/')
+    app = Flask(__name__, static_folder=dist_dir, static_url_path='/static_flask_ignore')
 
     # --- Chargement de la configuration ---
     app.config.from_object(config_by_name[config_name])
