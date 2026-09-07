@@ -39,13 +39,13 @@ export default function Shop() {
     if (categoryFilter !== 'all' && product.category !== categoryFilter) return false
 
     // 2. Filtrage Longueur (si perruque)
-    if (lengthFilter !== 'all') {
+    if (categoryFilter !== 'care' && product.category !== 'care' && lengthFilter !== 'all') {
       const hasLength = (product.variants || []).some(v => v.length === lengthFilter)
       if (!hasLength) return false
     }
 
     // 3. Filtrage Type de bonnet
-    if (capFilter !== 'all') {
+    if (categoryFilter !== 'care' && product.category !== 'care' && capFilter !== 'all') {
       const hasCap = (product.variants || []).some(v => v.cap_type === capFilter)
       if (!hasCap) return false
     }

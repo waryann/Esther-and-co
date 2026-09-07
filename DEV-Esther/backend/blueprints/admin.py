@@ -227,8 +227,26 @@ def create_product():
         sale_price=float(data["sale_price"]) if data.get("sale_price") else None
     )
     db.session.add(product)
+    db.session.flush()
+
+    # Création des variantes initiales
+    if "variants" in data and isinstance(data["variants"], list):
+        from backend.models.product_variant import ProductVariant
+        for v_data in data["variants"]:
+            variant = ProductVariant(
+                product_id=product.id,
+                length=v_data.get("length"),
+                density=v_data.get("density"),
+                cap_type=v_data.get("cap_type"),
+                color=v_data.get("color"),
+                texture=v_data.get("texture"),
+                price_modifier=float(v_data.get("price_modifier", 0.0)),
+                stock=int(v_data.get("stock", 0))
+            )
+            db.session.add(variant)
+
     db.session.commit()
-    return jsonify({"message": "Produit créé", "product": product.to_dict()}), 201
+    return jsonify({"message": "Produit créé", "product": product.to_dict(include_variants=True)}), 201
 
 
 @admin_bp.route("/products/<int:product_id>", methods=["PUT"])
@@ -275,6 +293,30 @@ def update_product(product_id):
 
     db.session.commit()
     return jsonify({"message": "Produit mis à jour", "product": product.to_dict(include_variants=True)})
+
+
+@admin_bp.route("/products/<int:product_id>", methods=["DELETE"])
+def delete_product(product_id):
+    """Supprimer un produit et ses variantes (si aucune commande)."""
+    product = Product.query.get_or_404(product_id)
+    
+    # Vérifier s'il y a des commandes pour ce produit
+    from backend.models.order import OrderItem
+    has_orders = OrderItem.query.filter_by(product_id=product_id).first()
+    
+    if has_orders:
+        # On ne peut pas le supprimer, on le désactive pour l'historique
+        product.is_active = False
+        db.session.commit()
+        return jsonify({"message": "Produit désactivé (impossible de le supprimer car il est lié à des commandes existantes)"})
+    
+    # Supprimer les variantes puis le produit
+    from backend.models.product_variant import ProductVariant
+    ProductVariant.query.filter_by(product_id=product_id).delete()
+    db.session.delete(product)
+    db.session.commit()
+    
+    return jsonify({"message": "Produit supprimé avec succès"})
 
 
 # ─────────────────────────────────────────

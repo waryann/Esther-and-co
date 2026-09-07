@@ -114,6 +114,11 @@ def create_app(config_name: str = "default") -> Flask:
     def internal_error(e):
         return jsonify({"error": "Erreur interne du serveur."}), 500
 
+    from backend.services.scheduler import start_scheduler
+    # Prevent running multiple times in development with auto-reloader
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
+        start_scheduler(app)
+
     return app
 
 
@@ -121,6 +126,7 @@ def create_app(config_name: str = "default") -> Flask:
 if __name__ == "__main__":
     env = os.environ.get("FLASK_ENV", "development")
     application = create_app(env)
+    
     application.run(
         host="0.0.0.0",
         port=5003,

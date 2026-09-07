@@ -9,7 +9,8 @@ export default function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState(null)
   const [newProduct, setNewProduct] = useState({
     name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
-    is_bestseller: false, is_new: true, on_sale: false, sale_price: ''
+    is_bestseller: false, is_new: true, on_sale: false, sale_price: '',
+    variants: []
   })
   const [uploading, setUploading] = useState(false)
 
@@ -55,6 +56,17 @@ export default function AdminProducts() {
   const toggleFeatured = (product) => {
     axios.put(`/api/admin/products/${product.id}`, { is_featured: !product.is_featured })
       .then(() => fetchProducts())
+  }
+
+  const deleteProduct = (product) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le produit "${product.name}" ?`)) {
+      axios.delete(`/api/admin/products/${product.id}`)
+        .then((res) => {
+          alert(res.data.message)
+          fetchProducts()
+        })
+        .catch(() => alert('Erreur lors de la suppression'))
+    }
   }
 
   const toggleActive = (product) => {
@@ -138,6 +150,25 @@ export default function AdminProducts() {
     }).catch(() => alert('Erreur lors de la sauvegarde'))
   }
 
+  const addVariantToNewProduct = () => {
+    setNewProduct(prev => ({
+      ...prev,
+      variants: [...prev.variants, { length: '', density: '', cap_type: '', color: '', texture: '', price_modifier: 0, stock: 0 }]
+    }))
+  }
+
+  const updateNewVariant = (index, field, value) => {
+    const updatedVariants = [...newProduct.variants]
+    updatedVariants[index] = { ...updatedVariants[index], [field]: value }
+    setNewProduct(prev => ({ ...prev, variants: updatedVariants }))
+  }
+
+  const removeNewVariant = (index) => {
+    const updatedVariants = [...newProduct.variants]
+    updatedVariants.splice(index, 1)
+    setNewProduct(prev => ({ ...prev, variants: updatedVariants }))
+  }
+
   const openEditForm = (product) => {
     setEditingProduct(product)
     setNewProduct({
@@ -150,7 +181,8 @@ export default function AdminProducts() {
       is_bestseller: product.is_bestseller || false,
       is_new: product.is_new || false,
       on_sale: product.on_sale || false,
-      sale_price: product.sale_price || ''
+      sale_price: product.sale_price || '',
+      variants: [] // On modifie les variantes existantes via le tableau directement
     })
     setShowAddForm(true)
   }
@@ -160,7 +192,7 @@ export default function AdminProducts() {
     setEditingProduct(null)
     setNewProduct({
       name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
-      is_bestseller: false, is_new: true, on_sale: false, sale_price: ''
+      is_bestseller: false, is_new: true, on_sale: false, sale_price: '', variants: []
     })
   }
 
@@ -274,7 +306,26 @@ export default function AdminProducts() {
                     onChange={e => setNewProduct({...newProduct, is_featured: e.target.checked})} />
                   Mettre en avant sur la Home (Featured)
                 </label>
-                <button className="btn btn-primary" onClick={saveProduct} disabled={uploading}>
+
+                {!editingProduct && (
+                  <div className="admin-form__variants" style={{ marginTop: '2rem', borderTop: '1px solid var(--grey-800)', paddingTop: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <h4>Variantes Initiales</h4>
+                      <button className="btn btn-sm" onClick={addVariantToNewProduct}>+ Ajouter Variante</button>
+                    </div>
+                    {newProduct.variants.map((v, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                        <input className="admin-input" placeholder="Longueur (ex: 18&quot;)" value={v.length} onChange={e => updateNewVariant(i, 'length', e.target.value)} style={{ width: '100px' }} />
+                        <input className="admin-input" placeholder="Densité" value={v.density} onChange={e => updateNewVariant(i, 'density', e.target.value)} style={{ width: '80px' }} />
+                        <input className="admin-input" placeholder="Bonnet" value={v.cap_type} onChange={e => updateNewVariant(i, 'cap_type', e.target.value)} style={{ width: '100px' }} />
+                        <input className="admin-input" type="number" placeholder="Stock" value={v.stock} onChange={e => updateNewVariant(i, 'stock', e.target.value)} style={{ width: '70px' }} />
+                        <button style={{ color: 'red', background: 'transparent', border: 'none', cursor: 'pointer' }} onClick={() => removeNewVariant(i)}>✖</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button className="btn btn-primary" onClick={saveProduct} disabled={uploading} style={{ marginTop: '2rem', width: '100%' }}>
                   {uploading ? "Veuillez patienter..." : (editingProduct ? "Enregistrer les modifications" : "Créer le produit")}
                 </button>
               </div>
@@ -362,6 +413,13 @@ export default function AdminProducts() {
                     onClick={() => toggleActive(product)}
                   >
                     {product.is_active ? '✓ Actif' : '✗ Inactif'}
+                  </button>
+                  <button
+                    className="admin-toggle"
+                    style={{ backgroundColor: '#ff444422', border: '1px solid #ff4444', color: '#ff4444' }}
+                    onClick={() => deleteProduct(product)}
+                  >
+                    🗑️ Supprimer
                   </button>
                 </div>
               </div>
