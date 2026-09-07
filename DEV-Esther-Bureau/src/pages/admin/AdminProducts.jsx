@@ -128,21 +128,53 @@ export default function AdminProducts() {
     })
   }
 
-  const createProduct = () => {
+  const saveProduct = () => {
     if (!newProduct.name || !newProduct.base_price) return
-    axios.post('/api/admin/products', {
+    const payload = {
       ...newProduct,
       base_price: parseFloat(newProduct.base_price),
       sale_price: newProduct.sale_price ? parseFloat(newProduct.sale_price) : null,
       stock: newProduct.stock ? parseInt(newProduct.stock) : 0
-    }).then(() => {
-      fetchProducts()
-      setShowAddForm(false)
-      setNewProduct({
-        name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
-        is_bestseller: false, is_new: true, on_sale: false, sale_price: '', stock: ''
-      })
-    }).catch(() => alert('Erreur lors de la création'))
+    }
+    
+    if (editing) {
+      axios.put(`/api/admin/products/${editing}`, payload).then(() => {
+        fetchProducts()
+        closeForm()
+      }).catch(() => alert('Erreur lors de la modification'))
+    } else {
+      axios.post('/api/admin/products', payload).then(() => {
+        fetchProducts()
+        closeForm()
+      }).catch(() => alert('Erreur lors de la création'))
+    }
+  }
+
+  const closeForm = () => {
+    setShowAddForm(false)
+    setEditing(null)
+    setNewProduct({
+      name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
+      is_bestseller: false, is_new: true, on_sale: false, sale_price: '', stock: ''
+    })
+  }
+
+  const openEditForm = (product) => {
+    setEditing(product.id)
+    setNewProduct({
+      name: product.name || '',
+      description: product.description || '',
+      base_price: product.base_price || '',
+      category: product.category || 'wig',
+      is_featured: product.is_featured || false,
+      image_url: product.image_url || '',
+      is_bestseller: product.is_bestseller || false,
+      is_new: product.is_new || false,
+      on_sale: product.on_sale || false,
+      sale_price: product.sale_price || '',
+      stock: product.variants?.[0]?.stock || ''
+    })
+    setShowAddForm(true)
   }
 
   return (
@@ -160,15 +192,15 @@ export default function AdminProducts() {
           <motion.div
             className="admin-modal-overlay"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setShowAddForm(false)}
+            onClick={closeForm}
           >
             <motion.div
               className="admin-modal"
               initial={{ scale: 0.9 }} animate={{ scale: 1 }}
               onClick={e => e.stopPropagation()}
             >
-              <button className="admin-modal__close" onClick={() => setShowAddForm(false)}>✕</button>
-              <h3 className="font-serif">Nouveau produit</h3>
+              <button className="admin-modal__close" onClick={closeForm}>✕</button>
+              <h3 className="font-serif">{editing ? "Modifier le produit" : "Nouveau produit"}</h3>
 
               <div className="admin-form">
                 <div className="form-group">
@@ -269,8 +301,8 @@ export default function AdminProducts() {
                     onChange={e => setNewProduct({...newProduct, is_featured: e.target.checked})} />
                   Mettre en avant sur la Home (Featured)
                 </label>
-                <button className="btn btn-primary" onClick={createProduct} disabled={uploading}>
-                  {uploading ? "Veuillez patienter..." : "Créer le produit"}
+                <button className="btn btn-primary" onClick={saveProduct} disabled={uploading}>
+                  {uploading ? "Veuillez patienter..." : (editing ? "Enregistrer les modifs" : "Créer le produit")}
                 </button>
               </div>
             </motion.div>
@@ -350,6 +382,13 @@ export default function AdminProducts() {
                     onClick={() => toggleActive(product)}
                   >
                     {product.is_active ? '✓ Actif' : '✗ Inactif'}
+                  </button>
+                  <button
+                    className="admin-toggle"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                    onClick={() => openEditForm(product)}
+                  >
+                    ✏️ Éditer
                   </button>
                   <button
                     className="admin-toggle"
