@@ -122,35 +122,57 @@
   overflow: hidden;
 }
 
-/* --- Photo plein écran --- */
-.editorial__fullscreen {
+/* --- GIF Strip — 4 panels côte à côte --- */
+.editorial__gif-strip {
   position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   height: 90vh;
   min-height: 500px;
   overflow: hidden;
+  background: var(--black);
 }
 
-.editorial__fullscreen-img {
+.editorial__gif-strip-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.1) 40%, transparent 70%);
+}
+
+.editorial__gif-panel {
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.editorial__gif-panel:last-of-type {
+  border-right: none;
+}
+
+.editorial__gif-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 20%;
   display: block;
-  filter: brightness(0.55);
+  filter: brightness(0.75) contrast(1.05) saturate(1.1);
+  transition: filter 0.6s ease, transform 4s ease;
 }
 
-.editorial__fullscreen-overlay {
+.editorial__gif-panel:hover .editorial__gif-img {
+  filter: brightness(0.9) contrast(1.05) saturate(1.1);
+  transform: scale(1.03);
+}
+
+.editorial__gif-text {
   position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 6rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
-}
-
-.editorial__fullscreen-content {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
   text-align: center;
+  padding-bottom: 4rem;
 }
 
 .editorial__fullscreen-title {
@@ -163,6 +185,44 @@
 .editorial__fullscreen-title em {
   color: var(--gold);
   font-style: italic;
+}
+
+/* Responsive: 2 colonnes sur tablettes, 1 colonne sur mobile */
+@media (max-width: 900px) {
+  .editorial__gif-strip {
+    grid-template-columns: repeat(2, 1fr);
+    height: auto;
+    min-height: unset;
+  }
+  .editorial__gif-panel {
+    height: 50vh;
+    min-height: 260px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .editorial__gif-panel:nth-child(2n+1) {
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .editorial__gif-panel:nth-child(2n) {
+    border-right: none;
+  }
+  .editorial__gif-text {
+    padding-bottom: 2rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .editorial__gif-strip {
+    grid-template-columns: 1fr 1fr;
+    height: auto;
+  }
+  .editorial__gif-panel {
+    height: 40vh;
+    min-height: 200px;
+  }
+  .editorial__fullscreen-title {
+    font-size: 2rem;
+  }
 }
 
 /* --- Duo photos + texte --- */

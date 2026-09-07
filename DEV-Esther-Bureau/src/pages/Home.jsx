@@ -5,6 +5,10 @@ import './Home.css'
 import HeroScene from '../components/animations/HeroScene'
 import modelBag from '../assets/images/model-bag.jpg'
 import modelBox from '../assets/images/model-box.jpg'
+import gif1 from '../assets/gif/1.gif'
+import gif2 from '../assets/gif/2.gif'
+import gif3 from '../assets/gif/3.gif'
+import gif4 from '../assets/gif/4.gif'
 const modelTurn = modelBox
 
 /* ---- Animation variants ---- */
@@ -211,31 +215,35 @@ export default function Home() {
       {/* ======== EDITORIAL GALLERY ======== */}
       <section className="editorial">
 
-        {/* Ligne 1 — Photo plein écran avec texte superposé */}
-        <motion.div
-          className="editorial__fullscreen"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.4 }}
-        >
-          <img src={modelTurn} alt="EST'HAIR & CO." className="editorial__fullscreen-img" />
-          <div className="editorial__fullscreen-overlay">
+        {/* Ligne 1 — 4 GIFs côte à côte */}
+        <div className="editorial__gif-strip">
+          <div className="editorial__gif-strip-overlay" />
+          {[gif1, gif2, gif3, gif4].map((gif, i) => (
             <motion.div
-              className="editorial__fullscreen-content"
-              initial={{ opacity: 0, y: 50 }}
+              key={i}
+              className="editorial__gif-panel"
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 1, delay: 0.5 }}
+              transition={{ duration: 0.9, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <p className="section-label">Editorial 2025</p>
-              <div className="divider" style={{ margin: '1rem auto' }} />
-              <h2 className="editorial__fullscreen-title font-serif">
-                La beauté<br /><em>en mouvement.</em>
-              </h2>
+              <img src={gif} alt={`EST'HAIR & CO. — Look ${i + 1}`} className="editorial__gif-img" />
             </motion.div>
-          </div>
-        </motion.div>
+          ))}
+          <motion.div
+            className="editorial__gif-text"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.6 }}
+          >
+            <p className="section-label">Editorial 2025</p>
+            <div className="divider" style={{ margin: '1rem auto' }} />
+            <h2 className="editorial__fullscreen-title font-serif">
+              La beauté<br /><em>en mouvement.</em>
+            </h2>
+          </motion.div>
+        </div>
 
         {/* Ligne 2 — Duo : grandes photos + texte */}
         <div className="editorial__duo container">
