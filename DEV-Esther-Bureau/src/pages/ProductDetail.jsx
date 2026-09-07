@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import axios from 'axios'
+import { useCart } from '../context/CartContext'
 import './ProductDetail.css'
 
 export default function ProductDetail() {
@@ -14,6 +15,7 @@ export default function ProductDetail() {
   const [selectedDensity, setSelectedDensity] = useState('')
   const [selectedCap, setSelectedCap] = useState('')
   const [quantity, setQuantity] = useState(1)
+  const { addToCart } = useCart()
 
   useEffect(() => {
     setLoading(true)
@@ -82,6 +84,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!inStock) return
+    addToCart(product, quantity, activeVariant, finalPrice)
     alert(`Ajouté au panier: ${product.name} (Quantité: ${quantity}) - Total: ${finalPrice * quantity} €`)
   }
 

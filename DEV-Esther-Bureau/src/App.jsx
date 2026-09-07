@@ -12,8 +12,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import BookingSuccess from './pages/BookingSuccess'
 import BookingCancel from './pages/BookingCancel'
 
-// Pages à venir (décommentées au fil des étapes)
-// import Cart from './pages/Cart'
+import Cart from './pages/Cart'
 // import Account from './pages/Account'
 
 function App() {
@@ -27,6 +26,7 @@ function App() {
         <Route path="/booking/cancel" element={<><Navbar /><BookingCancel /></>} />
         <Route path="/shop" element={<><Navbar /><Shop /></>} />
         <Route path="/shop/:id" element={<><Navbar /><ProductDetail /></>} />
+        <Route path="/cart" element={<><Navbar /><Cart /></>} />
         <Route path="/services" element={<><Navbar /><Services /></>} />
         <Route path="/services/:id" element={<><Navbar /><ServiceDetail /></>} />
         <Route path="/about" element={<><Navbar /><About /></>} />
