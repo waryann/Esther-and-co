@@ -171,20 +171,20 @@ export default function Home() {
             custom={3}
           >
             <motion.a
-              href="/shop"
+              href="/booking"
               className="btn btn-primary"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Explorer la collection
+              Je book mon rendez-vous
             </motion.a>
             <motion.a
-              href="/booking"
+              href="/shop"
               className="btn btn-outline"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Réserver une pose
+              Explorer la collection
             </motion.a>
           </motion.div>
         </motion.div>
