@@ -52,6 +52,11 @@ def create_app(config_name: str = "default") -> Flask:
             api_key=os.environ.get("CLOUDINARY_API_KEY"),
             api_secret=os.environ.get("CLOUDINARY_API_SECRET")
         )
+        
+    # --- Configuration Stripe ---
+    import stripe
+    if os.environ.get("STRIPE_SECRET_KEY"):
+        stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 
     # --- Enregistrement des Blueprints (routes API) ---
     from backend.blueprints.auth import auth_bp

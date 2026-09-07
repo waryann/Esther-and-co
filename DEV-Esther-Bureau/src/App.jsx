@@ -9,6 +9,9 @@ import ServiceDetail from './pages/ServiceDetail'
 import About from './pages/About'
 import AdminLayout from './pages/admin/AdminLayout'
 
+import BookingSuccess from './pages/BookingSuccess'
+import BookingCancel from './pages/BookingCancel'
+
 // Pages à venir (décommentées au fil des étapes)
 // import Cart from './pages/Cart'
 // import Account from './pages/Account'
@@ -20,6 +23,8 @@ function App() {
         {/* Routes publiques (avec Navbar) */}
         <Route path="/" element={<><Navbar /><Home /></>} />
         <Route path="/booking" element={<><Navbar /><Booking /></>} />
+        <Route path="/booking/success" element={<><Navbar /><BookingSuccess /></>} />
+        <Route path="/booking/cancel" element={<><Navbar /><BookingCancel /></>} />
         <Route path="/shop" element={<><Navbar /><Shop /></>} />
         <Route path="/shop/:id" element={<><Navbar /><ProductDetail /></>} />
         <Route path="/services" element={<><Navbar /><Services /></>} />

@@ -101,7 +101,7 @@ def create_appointment():
     total_price = round(base_price + options_total, 2)
     deposit_amount = service.get_deposit_amount(base_price=total_price)
 
-    # Création du RDV en simulant le paiement de l'acompte
+    # Création du RDV en attente de paiement
     appointment = Appointment(
         user_id=data["user_id"],
         service_id=data["service_id"],
@@ -111,19 +111,16 @@ def create_appointment():
         client_notes=data["client_notes"],
         total_price=total_price,
         deposit_amount=deposit_amount,
-        status="confirmed",  # Simulé : L'acompte est payé
-        deposit_paid=True,
-        deposit_paid_at=datetime.utcnow(),
+        status="pending",
+        deposit_paid=False,
+        deposit_paid_at=None,
         selected_options=selected_options,
     )
 
     db.session.add(appointment)
     db.session.commit()
 
-    # Envoi du SMS de confirmation
-    send_appointment_confirmation(appointment)
-
-    return jsonify({"message": "Rendez-vous confirmé", "appointment": appointment.to_dict()}), 201
+    return jsonify({"message": "Rendez-vous en attente de paiement", "appointment": appointment.to_dict()}), 201
 
 
 @appointments_bp.route("/", methods=["GET"])
