@@ -404,6 +404,8 @@
   .editorial__duo {
     grid-template-columns: 1fr;
     gap: var(--space-md);
+    padding-top: var(--space-xl);
+    margin-top: 2rem;
   }
   .editorial__duo-images {
     max-width: 500px;

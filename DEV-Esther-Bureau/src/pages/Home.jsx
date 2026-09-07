@@ -75,7 +75,7 @@ function ProductCard({ id, name, category, price, tag, image_url, index }) {
       viewport={{ once: true, margin: '-60px' }}
       custom={index * 0.15}
       ref={ref}
-      onClick={() => navigate(`/product/${id}`)}
+      onClick={() => navigate(`/shop/${id}`)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ cursor: 'pointer' }}
@@ -455,7 +455,7 @@ export default function Home() {
               <Reveal key={item.id} delay={i * 0.1}>
                 <div 
                   className="care-card"
-                  onClick={() => window.location.href = `/product/${item.id}`}
+                  onClick={() => navigate(`/shop/${item.id}`)}
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="care-card__image">
