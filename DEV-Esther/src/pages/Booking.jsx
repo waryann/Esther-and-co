@@ -75,8 +75,15 @@ export default function Booking() {
         client_notes: formData.notes
       }
       
-      await axios.post('/api/appointments/', payload)
-      setSuccess(true)
+      const res = await axios.post('/api/appointments/', payload)
+      
+      if (res.data.checkout_url) {
+        // Redirection vers Stripe
+        window.location.href = res.data.checkout_url
+      } else {
+        // Fallback local (sans Stripe)
+        setSuccess(true)
+      }
     } catch (error) {
       console.error('Erreur lors de la réservation:', error)
       alert("Une erreur est survenue lors de la réservation.")
