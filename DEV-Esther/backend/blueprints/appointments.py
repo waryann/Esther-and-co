@@ -59,7 +59,7 @@ def get_available_slots():
 def create_appointment():
     data = request.json
     # Validation basique
-    required_fields = ["user_id", "service_id", "scheduled_at", "head_size", "client_notes"]
+    required_fields = ["email", "first_name", "last_name", "phone", "service_id", "scheduled_at"]
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Données incomplètes"}), 400
 
