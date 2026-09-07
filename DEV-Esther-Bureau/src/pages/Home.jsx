@@ -103,11 +103,16 @@ export default function Home() {
   const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
-  const [products, setProducts] = useState([])
+  const [wigs, setWigs] = useState([])
+  const [cares, setCares] = useState([])
 
   useEffect(() => {
     axios.get('/api/products?category=wig')
-      .then(res => setProducts(res.data.slice(0, 4)))
+      .then(res => setWigs(res.data.slice(0, 4)))
+      .catch(err => console.error(err))
+
+    axios.get('/api/products?category=care')
+      .then(res => setCares(res.data.slice(0, 3)))
       .catch(err => console.error(err))
   }, [])
 
@@ -368,7 +373,7 @@ export default function Home() {
           </Reveal>
 
           <div className="collection__grid">
-            {products.map((p, i) => (
+            {wigs.map((p, i) => (
               <ProductCard 
                 key={p.id}
                 name={p.name}
@@ -432,16 +437,16 @@ export default function Home() {
             </h2>
           </Reveal>
           <div className="care__grid">
-            {[
-              { name: 'Shampoing hydratant', price: '24' },
-              { name: 'Spray démêlant', price: '19' },
-              { name: 'Masque nutritif', price: '32' },
-            ].map((item, i) => (
-              <Reveal key={item.name} delay={i * 0.1}>
+            {cares.map((item, i) => (
+              <Reveal key={item.id} delay={i * 0.1}>
                 <div className="care-card">
-                  <div className="care-card__image" />
+                  <div className="care-card__image">
+                    {item.image_url && (
+                      <img src={item.image_url} alt={item.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                    )}
+                  </div>
                   <p className="care-card__name">{item.name}</p>
-                  <p className="care-card__price">{item.price}€</p>
+                  <p className="care-card__price">{item.base_price}€</p>
                 </div>
               </Reveal>
             ))}
