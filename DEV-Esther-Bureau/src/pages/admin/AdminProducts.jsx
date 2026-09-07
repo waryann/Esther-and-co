@@ -9,7 +9,7 @@ export default function AdminProducts() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [newProduct, setNewProduct] = useState({
     name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
-    is_bestseller: false, is_new: true, on_sale: false, sale_price: ''
+    is_bestseller: false, is_new: true, on_sale: false, sale_price: '', stock: ''
   })
   const [uploading, setUploading] = useState(false)
   const [autoRemoveBg, setAutoRemoveBg] = useState(true)
@@ -92,6 +92,13 @@ export default function AdminProducts() {
     }).then(() => fetchProducts())
   }
 
+  const deleteProduct = (product) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer ${product.name} ?`)) return
+    axios.delete(`/api/admin/products/${product.id}`)
+      .then(() => fetchProducts())
+      .catch(err => alert("Erreur lors de la suppression: " + (err.response?.data?.error || err.message)))
+  }
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0]
     if (!file) return
@@ -126,13 +133,14 @@ export default function AdminProducts() {
     axios.post('/api/admin/products', {
       ...newProduct,
       base_price: parseFloat(newProduct.base_price),
-      sale_price: newProduct.sale_price ? parseFloat(newProduct.sale_price) : null
+      sale_price: newProduct.sale_price ? parseFloat(newProduct.sale_price) : null,
+      stock: newProduct.stock ? parseInt(newProduct.stock) : 0
     }).then(() => {
       fetchProducts()
       setShowAddForm(false)
       setNewProduct({
         name: '', description: '', base_price: '', category: 'wig', is_featured: false, image_url: '',
-        is_bestseller: false, is_new: true, on_sale: false, sale_price: ''
+        is_bestseller: false, is_new: true, on_sale: false, sale_price: '', stock: ''
       })
     }).catch(() => alert('Erreur lors de la création'))
   }
@@ -186,6 +194,11 @@ export default function AdminProducts() {
                       <option value="wig">Perruque</option>
                       <option value="care">Produit d'entretien</option>
                     </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Stock initial</label>
+                    <input className="admin-input" type="number" value={newProduct.stock}
+                      onChange={e => setNewProduct({...newProduct, stock: e.target.value})} />
                   </div>
                 </div>
                 
@@ -337,6 +350,13 @@ export default function AdminProducts() {
                     onClick={() => toggleActive(product)}
                   >
                     {product.is_active ? '✓ Actif' : '✗ Inactif'}
+                  </button>
+                  <button
+                    className="admin-toggle"
+                    style={{ backgroundColor: 'rgba(255, 0, 0, 0.1)', color: '#ff4d4d', borderColor: 'rgba(255, 0, 0, 0.3)' }}
+                    onClick={() => deleteProduct(product)}
+                  >
+                    🗑️ Supprimer
                   </button>
                 </div>
               </div>

@@ -388,6 +388,8 @@
   width: 100%;
   max-width: 550px;
   position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .admin-modal__close {

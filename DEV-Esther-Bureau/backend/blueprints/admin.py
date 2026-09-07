@@ -229,8 +229,26 @@ def create_product():
         sale_price=float(data["sale_price"]) if data.get("sale_price") else None
     )
     db.session.add(product)
+    db.session.flush() # flush to get product.id
+
+    from backend.models.product_variant import ProductVariant
+    stock = data.get("stock", 0)
+    variant = ProductVariant(
+        product_id=product.id,
+        stock_quantity=int(stock)
+    )
+    db.session.add(variant)
+
     db.session.commit()
     return jsonify({"message": "Produit créé", "product": product.to_dict()}), 201
+
+@admin_bp.route("/products/<int:product_id>", methods=["DELETE"])
+def delete_product(product_id):
+    """Supprimer un produit et ses variantes."""
+    product = Product.query.get_or_404(product_id)
+    db.session.delete(product)
+    db.session.commit()
+    return jsonify({"message": "Produit supprimé"})
 
 
 @admin_bp.route("/products/<int:product_id>", methods=["PUT"])
