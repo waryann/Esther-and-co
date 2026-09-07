@@ -6,6 +6,7 @@ import AdminDashboard from './AdminDashboard'
 import AdminAppointments from './AdminAppointments'
 import AdminOrders from './AdminOrders'
 import AdminProducts from './AdminProducts'
+import AdminServices from './AdminServices'
 import './Admin.css'
 
 export default function AdminLayout() {
@@ -15,6 +16,7 @@ export default function AdminLayout() {
     { path: '/admin', label: 'Dashboard', icon: '⬛', exact: true },
     { path: '/admin/appointments', label: 'Rendez-vous', icon: '📅' },
     { path: '/admin/orders', label: 'Commandes', icon: '📦' },
+    { path: '/admin/services', label: 'Prestations', icon: '💇' },
     { path: '/admin/products', label: 'Produits & Stock', icon: '👜' },
   ]
 
@@ -57,6 +59,7 @@ export default function AdminLayout() {
           <Route index element={<AdminDashboard />} />
           <Route path="appointments" element={<AdminAppointments />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="services" element={<AdminServices />} />
           <Route path="products" element={<AdminProducts />} />
         </Routes>
       </main>
