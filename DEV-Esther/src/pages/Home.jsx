@@ -106,6 +106,7 @@ export default function Home() {
 
 
   const [featuredProducts, setFeaturedProducts] = useState([])
+  const [careProducts, setCareProducts] = useState([])
 
   useEffect(() => {
     axios.get('/api/products/')
@@ -114,6 +115,10 @@ export default function Home() {
         let featured = res.data.filter(p => p.is_featured)
         if (featured.length === 0) featured = res.data.slice(0, 4)
         setFeaturedProducts(featured.slice(0, 4))
+        
+        // Prendre les produits de soin
+        let cares = res.data.filter(p => p.category === 'care')
+        setCareProducts(cares.slice(0, 3))
       })
       .catch(err => console.error("Erreur chargement produits home:", err))
   }, [])
@@ -437,19 +442,25 @@ export default function Home() {
             </h2>
           </Reveal>
           <div className="care__grid">
-            {[
-              { name: 'Shampoing hydratant', price: '24' },
-              { name: 'Spray démêlant', price: '19' },
-              { name: 'Masque nutritif', price: '32' },
-            ].map((item, i) => (
-              <Reveal key={item.name} delay={i * 0.1}>
-                <div className="care-card">
-                  <div className="care-card__image" />
-                  <p className="care-card__name">{item.name}</p>
-                  <p className="care-card__price">{item.price}€</p>
-                </div>
-              </Reveal>
-            ))}
+            {careProducts.length > 0 ? (
+              careProducts.map((item, i) => (
+                <Reveal key={item.id} delay={i * 0.1}>
+                  <a href={`/shop/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="care-card">
+                      <div className="care-card__image">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                        ) : null}
+                      </div>
+                      <p className="care-card__name">{item.name}</p>
+                      <p className="care-card__price">{item.base_price}€</p>
+                    </div>
+                  </a>
+                </Reveal>
+              ))
+            ) : (
+              <p style={{ textAlign: 'center', opacity: 0.5, gridColumn: '1 / -1' }}>Aucun soin disponible pour le moment.</p>
+            )}
           </div>
         </div>
       </section>
