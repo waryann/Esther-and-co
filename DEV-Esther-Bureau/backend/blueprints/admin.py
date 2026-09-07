@@ -235,7 +235,7 @@ def create_product():
     stock = data.get("stock", 0)
     variant = ProductVariant(
         product_id=product.id,
-        stock_quantity=int(stock)
+        stock=int(stock)
     )
     db.session.add(variant)
 
