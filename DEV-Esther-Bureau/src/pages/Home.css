@@ -193,6 +193,7 @@
     grid-template-columns: 1fr 1fr;
     height: 75vh;
     min-height: 400px;
+    margin-bottom: var(--space-xl);
   }
   .editorial__gif-panel {
     border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -403,9 +404,8 @@
 @media (max-width: 900px) {
   .editorial__duo {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
-    padding-top: var(--space-xl);
-    margin-top: 2rem;
+    gap: var(--space-xl);
+    padding-top: 2rem;
   }
   .editorial__duo-images {
     max-width: 500px;
