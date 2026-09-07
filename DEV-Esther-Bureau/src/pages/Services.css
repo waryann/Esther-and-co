@@ -1,0 +1,137 @@
+/* =====================================================
+   Services Page ("Vente / Services proposés") — EST'HAIR & CO.
+   ===================================================== */
+
+.services-page {
+  background: var(--black);
+  min-height: 100vh;
+  padding-top: 80px;
+}
+
+.services-hero {
+  background: radial-gradient(circle at center, #181613 0%, #060606 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 5rem 2rem;
+  text-align: center;
+}
+
+.services-hero__content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.services-hero__subtitle {
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.services-hero__title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 300;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.services-hero__desc {
+  font-size: 1.1rem;
+  color: var(--grey-300);
+  line-height: 1.6;
+}
+
+.services-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.services-section-title {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--gold);
+  margin: 3rem 0 1.5rem;
+}
+
+.services-section-title:first-child {
+  margin-top: 0;
+}
+
+.services-grid-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.service-page-card {
+  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--grey-900);
+  transition: border-color 0.3s;
+}
+
+.service-page-card:hover {
+  border-color: rgba(255,255,255,0.3);
+}
+
+.service-page-card__link {
+  display: flex;
+  flex-direction: column;
+  padding: 1.8rem;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+  position: relative;
+}
+
+.service-page-card__badge {
+  align-self: flex-start;
+  background: var(--gold);
+  color: var(--black);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.service-page-card__title {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 0.8rem;
+}
+
+.service-page-card__desc {
+  font-size: 0.85rem;
+  color: var(--grey-300);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.service-page-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--grey-300);
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.service-page-card__price {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.service-page-card__cta {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white);
+}

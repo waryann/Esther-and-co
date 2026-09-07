@@ -1,0 +1,156 @@
+/* =====================================================
+   Service Detail Page — EST'HAIR & CO.
+   ===================================================== */
+
+.service-detail-page {
+  background: var(--black);
+  min-height: 100vh;
+  padding-top: 120px;
+  padding-bottom: 5rem;
+}
+
+.service-detail-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.service-detail-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.service-detail-badge {
+  align-self: flex-start;
+  background: var(--gold);
+  color: var(--black);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.service-detail-title {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.service-detail-price {
+  font-size: 1.8rem;
+  color: var(--gold);
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 1.5rem;
+}
+
+.service-detail-block {
+  margin-bottom: 2rem;
+}
+
+.service-detail-block p {
+  font-size: 0.95rem;
+  color: var(--grey-100);
+  line-height: 1.6;
+}
+
+.service-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.service-detail-meta__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.service-detail-meta__label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--grey-300);
+}
+
+.service-detail-meta__value {
+  font-size: 1rem;
+  color: var(--white);
+}
+
+.service-detail-includes {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.service-detail-includes li {
+  font-size: 0.95rem;
+  color: var(--grey-100);
+  padding-left: 1.4rem;
+  position: relative;
+}
+
+.service-detail-includes li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+
+.service-detail-variants {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.service-detail-variant-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--grey-100);
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.service-detail-variant-price {
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.service-detail-conditions {
+  font-size: 0.85rem;
+  color: var(--grey-300);
+  font-style: italic;
+  margin-bottom: 1.5rem;
+}
+
+.service-detail-deposit-note {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.6;
+  background: rgba(201, 169, 110, 0.08);
+  padding: 1rem;
+  border-left: 2px solid var(--gold);
+  margin-bottom: 2rem;
+}
+
+.service-detail-error {
+  text-align: center;
+  padding: 10rem 2rem;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}

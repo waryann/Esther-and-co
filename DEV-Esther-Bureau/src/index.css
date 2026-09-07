@@ -1,0 +1,170 @@
+/* =====================================================
+   EST'HAIR & CO. — Design System Global
+   Palette : Noir #000 / Blanc #FFF / Or #C9A96E
+   Font : Cormorant Garamond (serif) + Inter (sans)
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --black:       #000000;
+  --white:       #FFFFFF;
+  --gold:        #C9A96E;
+  --gold-light:  #E8D5B0;
+  --grey-900:    #0A0A0A;
+  --grey-800:    #111111;
+  --grey-700:    #1A1A1A;
+  --grey-500:    #4A4A4A;
+  --grey-300:    #888888;
+  --grey-100:    #F0F0F0;
+
+  --font-serif:  'Cormorant Garamond', Georgia, serif;
+  --font-sans:   'Inter', system-ui, sans-serif;
+
+  --transition-fast:   0.2s ease;
+  --transition-base:   0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow:   0.8s cubic-bezier(0.16, 1, 0.3, 1);
+
+  --space-xs:  0.5rem;
+  --space-sm:  1rem;
+  --space-md:  2rem;
+  --space-lg:  4rem;
+  --space-xl:  8rem;
+  --space-2xl: 12rem;
+
+  --max-width: 1400px;
+  --border-radius: 2px;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* --- Scrollbar custom --- */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+/* --- Selection --- */
+::selection { background: var(--gold); color: var(--black); }
+
+/* --- Typography utilities --- */
+.font-serif { font-family: var(--font-serif); }
+.font-sans  { font-family: var(--font-sans); }
+
+/* --- Layout --- */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: var(--white);
+  color: var(--black);
+  padding: 1rem 2.5rem;
+}
+
+.btn-primary:hover {
+  background: var(--gold);
+  color: var(--black);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--white);
+  padding: 1rem 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-outline:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--black);
+  padding: 1rem 2.5rem;
+}
+
+.btn-gold:hover {
+  background: var(--gold-light);
+}
+
+/* --- Gold divider --- */
+.divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+  margin: var(--space-md) auto;
+}
+
+.divider-left {
+  margin-left: 0;
+}
+
+/* --- Section label --- */
+.section-label {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* --- Gradient overlays --- */
+.gradient-bottom {
+  background: linear-gradient(to bottom, transparent 60%, var(--black) 100%);
+}
+
+/* --- Cursor glow effect --- */
+.cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 169, 110, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  transition: opacity 0.3s;
+}
