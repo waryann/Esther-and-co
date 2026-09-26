@@ -11,6 +11,7 @@ class Service(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    image_url = db.Column(db.String(300), nullable=True)
 
     # Durée en minutes (variable selon la prestation)
     # Ex: Pose lace front = 120 min, Pose full lace = 180 min
@@ -55,6 +56,7 @@ class Service(db.Model):
             "id": self.id,
             "name": self.name,
             "description": self.description,
+            "image_url": self.image_url,
             "duration_minutes": self.duration_minutes,
             "price": self.price,
             "deposit_amount": self.get_deposit_amount(),

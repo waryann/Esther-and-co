@@ -25,6 +25,15 @@
   --grey-300:    #888888;
   --grey-100:    #F0F0F0;
 
+  /* --- Thème (clair) : fond de page / texte principal / surfaces --- */
+  --bg:          #FBFAF7;
+  --bg-soft:     #F3F1EB;
+  --surface:     #FFFFFF;
+  --text:        #1C1A17;
+  --text-soft:   #5C5850;
+  --border-soft: rgba(28, 26, 23, 0.1);
+  --border-mid:  rgba(28, 26, 23, 0.18);
+
   --font-serif:  'Cormorant Garamond', Georgia, serif;
   --font-sans:   'Inter', system-ui, sans-serif;
 
@@ -51,8 +60,8 @@ html {
 }
 
 body {
-  background: var(--black);
-  color: var(--white);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font-sans);
   font-weight: 300;
   line-height: 1.6;
@@ -61,7 +70,7 @@ body {
 
 /* --- Scrollbar custom --- */
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
 
 /* --- Selection --- */
@@ -97,8 +106,8 @@ body {
 }
 
 .btn-primary {
-  background: var(--white);
-  color: var(--black);
+  background: var(--text);
+  color: var(--bg);
   padding: 1rem 2.5rem;
 }
 
@@ -109,12 +118,33 @@ body {
 
 .btn-outline {
   background: transparent;
-  color: var(--white);
+  color: var(--text);
   padding: 1rem 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--border-mid);
 }
 
 .btn-outline:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* Variante pour les boutons posés sur un fond sombre (hero photo/3D) */
+.btn-on-dark.btn-primary {
+  background: var(--white);
+  color: var(--black);
+}
+
+.btn-on-dark.btn-primary:hover {
+  background: var(--gold);
+  color: var(--black);
+}
+
+.btn-on-dark.btn-outline {
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-on-dark.btn-outline:hover {
   border-color: var(--gold);
   color: var(--gold);
 }

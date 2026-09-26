@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import './Home.css'
 import HeroScene from '../components/animations/HeroScene'
+import { SHOP_ENABLED } from '../config/features'
 import modelBag from '../assets/images/model-bag.jpg'
 import modelBox from '../assets/images/model-box.jpg'
 const gif1 = '/gif/1.gif'
@@ -115,6 +116,8 @@ export default function Home() {
   const [cares, setCares] = useState([])
 
   useEffect(() => {
+    if (!SHOP_ENABLED) return
+
     axios.get('/api/products?category=wig')
       .then(res => setWigs(res.data.slice(0, 4)))
       .catch(err => console.error(err))
@@ -180,20 +183,22 @@ export default function Home() {
           >
             <motion.a
               href="/booking"
-              className="btn btn-primary"
+              className="btn btn-primary btn-on-dark"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               Je book mon rendez-vous
             </motion.a>
-            <motion.a
-              href="/shop"
-              className="btn btn-outline"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Explorer la collection
-            </motion.a>
+            {SHOP_ENABLED && (
+              <motion.a
+                href="/shop"
+                className="btn btn-outline btn-on-dark"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Explorer la collection
+              </motion.a>
+            )}
           </motion.div>
         </motion.div>
 
@@ -283,9 +288,10 @@ export default function Home() {
               Un luxe<br />accessible.
             </h2>
             <p className="editorial__duo-desc">
-              Chaque perruque EST'HAIR & CO. est le fruit d'une sélection rigoureuse.
-              Des cheveux 100% naturels, des bonnets sur-mesure et une finition irréprochable —
-              le tout livré dans un packaging exclusif, à l'image de notre exigence.
+              Chez EST'HAIR & CO, nous croyons que le luxe capillaire doit être accessible à tous.
+              Chaque personne mérite une chevelure sublime et une coiffure qui la fait rayonner.
+              Nous avons rendu le luxe accessible pour permettre à chacun de révéler une beauté
+              à laquelle il n'avait auparavant pas le droit.
             </p>
             <div className="editorial__stats">
               <div className="editorial__stat">
@@ -301,14 +307,16 @@ export default function Home() {
                 <span className="editorial__stat-label">Avis clients</span>
               </div>
             </div>
-            <motion.a
-              href="/shop"
-              className="btn btn-outline"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Découvrir la collection
-            </motion.a>
+            {SHOP_ENABLED && (
+              <motion.a
+                href="/shop"
+                className="btn btn-outline"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Découvrir la collection
+              </motion.a>
+            )}
           </motion.div>
         </div>
 
@@ -333,9 +341,9 @@ export default function Home() {
           >
             <span className="editorial__banner-num font-serif">01</span>
             <blockquote className="editorial__banner-quote font-serif">
-              "Quand tu portes<br />une perruque EST'HAIR,<br />tu portes la confiance."
+              "Le fait de m'être coiffé chez toi,<br />m'a donné confiance en moi."
             </blockquote>
-            <p className="editorial__banner-author">— La Marque</p>
+            <p className="editorial__banner-author">— Lia, cliente</p>
           </motion.div>
         </div>
       </section>
@@ -363,6 +371,7 @@ export default function Home() {
       </section>
 
       {/* ======== COLLECTION ======== */}
+      {SHOP_ENABLED && (
       <section className="collection">
         <div className="container">
           <Reveal>
@@ -401,6 +410,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ======== BOOKING BANNER ======== */}
       <section className="booking-banner">
@@ -441,6 +451,7 @@ export default function Home() {
       </section>
 
       {/* ======== CROSS-SELLING ======== */}
+      {SHOP_ENABLED && (
       <section className="care">
         <div className="container">
           <Reveal>
@@ -471,6 +482,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ======== FOOTER ======== */}
       <footer className="footer">
@@ -483,7 +495,7 @@ export default function Home() {
             <div className="footer__links-group">
               <p className="footer__group-title">Navigation</p>
               <ul>
-                <li><a href="/shop">Collection</a></li>
+                {SHOP_ENABLED && <li><a href="/shop">Collection</a></li>}
                 <li><a href="/booking">Réservation</a></li>
                 <li><a href="/about">À Propos</a></li>
                 <li><a href="/contact">Contact</a></li>
@@ -492,7 +504,7 @@ export default function Home() {
             <div className="footer__links-group">
               <p className="footer__group-title">Mon compte</p>
               <ul>
-                <li><a href="/account">Mes commandes</a></li>
+                {SHOP_ENABLED && <li><a href="/account">Mes commandes</a></li>}
                 <li><a href="/account">Mes rendez-vous</a></li>
                 <li><a href="/login">Connexion</a></li>
               </ul>

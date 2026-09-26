@@ -13,6 +13,7 @@ export default function AdminServices() {
   const initialServiceState = {
     name: '',
     description: '',
+    image_url: '',
     price: '',
     duration_minutes: '60',
     deposit_amount: '0',
@@ -23,8 +24,9 @@ export default function AdminServices() {
     is_pack: false,
     is_active: true
   }
-  
+
   const [formData, setFormData] = useState(initialServiceState)
+  const [uploading, setUploading] = useState(false)
 
   const fetchServices = () => {
     setLoading(true)
@@ -56,6 +58,7 @@ export default function AdminServices() {
     setFormData({
       name: service.name,
       description: service.description || '',
+      image_url: service.image_url || '',
       price: service.price,
       duration_minutes: service.duration_minutes,
       deposit_amount: service.deposit_amount,
@@ -94,6 +97,28 @@ export default function AdminServices() {
         })
         .catch(() => alert('Erreur lors de la création'))
     }
+  }
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    const formPayload = new FormData()
+    formPayload.append('file', file)
+    formPayload.append('remove_bg', 'false')
+
+    axios.post('/api/admin/upload', formPayload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+      .then(res => {
+        setFormData(prev => ({ ...prev, image_url: res.data.image_url }))
+      })
+      .catch(err => {
+        console.error(err)
+        alert(err.response?.data?.error || "Erreur lors du téléversement")
+      })
+      .finally(() => setUploading(false))
   }
 
   // ─── VARIANTS ACTIONS ─────────────────────────────────────────────
@@ -156,6 +181,11 @@ export default function AdminServices() {
     <motion.div key={service.id} className="product-admin-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <div className="product-admin-card__header">
         <div className="product-admin-card__info-group">
+          {service.image_url && (
+            <div className="product-admin-card__image-wrap">
+              <img src={service.image_url} alt={service.name} className="product-admin-card__image" />
+            </div>
+          )}
           <div>
             <h3 className="font-serif">{service.name} {service.is_pack && <span className="badge badge--wig">📦 Pack</span>}</h3>
             <p className="admin-table__sub">{service.description}</p>
@@ -303,6 +333,29 @@ export default function AdminServices() {
                 <div className="form-group">
                   <label>Description</label>
                   <textarea className="admin-textarea" rows="2" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                </div>
+
+                <div className="form-group">
+                  <label>Photo de la prestation</label>
+                  <div className="admin-upload-area">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="service-image-upload"
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                      disabled={uploading}
+                    />
+                    <label htmlFor="service-image-upload" className={`admin-upload-label ${uploading ? 'uploading' : ''}`}>
+                      {uploading ? "⏳ Téléversement..." : "📸 Glisser ou Choisir une photo"}
+                    </label>
+
+                    {formData.image_url && (
+                      <div className="admin-upload-preview">
+                        <img src={formData.image_url} alt="Aperçu" className="preview-img" />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="admin-form__row">

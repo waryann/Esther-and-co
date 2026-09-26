@@ -85,16 +85,25 @@ function ServiceCard({ service }) {
       transition={{ duration: 0.4 }}
     >
       <Link to={`/services/${service.id}`} className="service-page-card__link">
-        {service.is_pack && <span className="service-page-card__badge">Pack</span>}
-        <h3 className="service-page-card__title font-serif">{service.name}</h3>
-        {service.description && <p className="service-page-card__desc">{service.description}</p>}
-        <div className="service-page-card__footer">
-          <span className="service-page-card__duration">⏱ {durationLabel}</span>
-          <span className="service-page-card__price">
-            {service.is_pack ? `À partir de ${service.price}€` : `${service.price}€`}
-          </span>
+        <div className="service-page-card__image-wrap">
+          {service.image_url ? (
+            <img src={service.image_url} alt={service.name} className="service-page-card__image" />
+          ) : (
+            <div className="service-page-card__placeholder font-serif">EST'HAIR</div>
+          )}
+          {service.is_pack && <span className="service-page-card__badge">Pack</span>}
         </div>
-        <span className="service-page-card__cta">Voir le détail ➔</span>
+        <div className="service-page-card__body">
+          <h3 className="service-page-card__title font-serif">{service.name}</h3>
+          {service.description && <p className="service-page-card__desc">{service.description}</p>}
+          <div className="service-page-card__footer">
+            <span className="service-page-card__duration">⏱ {durationLabel}</span>
+            <span className="service-page-card__price">
+              {service.is_pack ? `À partir de ${service.price}€` : `${service.price}€`}
+            </span>
+          </div>
+          <span className="service-page-card__cta">Voir le détail ➔</span>
+        </div>
       </Link>
     </motion.div>
   )

@@ -54,6 +54,11 @@ export default function ServiceDetail() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {service.image_url && (
+            <div className="service-detail-image-wrap">
+              <img src={service.image_url} alt={service.name} className="service-detail-image" />
+            </div>
+          )}
           {service.is_pack && <span className="service-detail-badge">Pack</span>}
           <h1 className="service-detail-title font-serif">{service.name}</h1>
           <p className="service-detail-price font-sans">

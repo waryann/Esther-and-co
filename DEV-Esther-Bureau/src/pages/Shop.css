@@ -3,7 +3,7 @@
    ===================================================== */
 
 .shop-page {
-  background: var(--black);
+  background: var(--bg);
   min-height: 100vh;
   padding-top: 80px;
 }
@@ -54,6 +54,21 @@
   gap: 3rem;
 }
 
+/* --- Bouton filtres (mobile uniquement) --- */
+.shop-filter-toggle {
+  display: none;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  text-align: left;
+}
+
 /* --- Sidebar Filters --- */
 .shop-sidebar {
   display: flex;
@@ -65,14 +80,14 @@
 }
 
 .shop-filter-group {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border-soft);
   padding-bottom: 1.5rem;
 }
 
 .shop-filter-title {
   font-size: 1.2rem;
   font-weight: 300;
-  color: var(--white);
+  color: var(--text);
   margin-bottom: 1rem;
   letter-spacing: 0.05em;
 }
@@ -86,7 +101,7 @@
 .filter-btn {
   background: transparent;
   border: none;
-  color: var(--grey-400);
+  color: var(--text-soft);
   text-align: left;
   font-family: var(--font-sans);
   font-size: 0.9rem;
@@ -98,7 +113,7 @@
 }
 
 .filter-btn:hover {
-  color: var(--white);
+  color: var(--text);
   padding-left: 8px;
 }
 
@@ -111,9 +126,9 @@
 
 .shop-select {
   width: 100%;
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--white);
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  color: var(--text);
   padding: 0.75rem 1rem;
   font-family: var(--font-sans);
   font-size: 0.9rem;
@@ -136,7 +151,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: var(--grey-400);
+  color: var(--text-soft);
   font-size: 0.9rem;
 }
 
@@ -148,8 +163,8 @@
 }
 
 .shop-card {
-  background: #0d0d0d;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -167,7 +182,7 @@
 
 .shop-card__image-container {
   aspect-ratio: 4/5;
-  background: radial-gradient(circle, #22201d 0%, #0d0d0d 100%); /* Fond de studio uniforme */
+  background: radial-gradient(circle, #F3F1EB 0%, #E7E3D8 100%); /* Fond de studio uniforme */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -190,7 +205,7 @@
 .shop-card__placeholder {
   font-size: 2rem;
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.05);
+  color: rgba(28, 26, 23, 0.08);
 }
 
 .shop-card__tags-wrap {
@@ -248,7 +263,7 @@
 
 .shop-card__title {
   font-size: 1.3rem;
-  color: var(--white);
+  color: var(--text);
   margin-bottom: 1.5rem;
   font-weight: 300;
   line-height: 1.3;
@@ -270,10 +285,10 @@
 
 .shop-card__price-original {
   text-decoration: line-through;
-  opacity: 0.4;
+  opacity: 0.6;
   margin-right: 8px;
   font-size: 0.85em;
-  color: var(--white);
+  color: var(--text-soft);
 }
 
 .shop-card__price-promo {
@@ -283,7 +298,7 @@
 
 .shop-card__discover {
   font-size: 0.85rem;
-  color: var(--grey-300);
+  color: var(--text-soft);
   transition: color 0.2s;
 }
 
@@ -295,9 +310,9 @@
 .shop-empty {
   text-align: center;
   padding: 5rem 2rem;
-  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border: 1px dashed var(--border-mid);
   font-size: 1.2rem;
-  color: var(--grey-300);
+  color: var(--text-soft);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,7 +322,7 @@
 .shop-loading {
   text-align: center;
   padding: 8rem 2rem;
-  color: var(--grey-400);
+  color: var(--text-soft);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -331,14 +346,23 @@
 @media (max-width: 1024px) {
   .shop-container {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
+  }
+  .shop-filter-toggle {
+    display: block;
   }
   .shop-sidebar {
+    display: none;
     position: relative;
     top: 0;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    padding: 1.5rem;
+  }
+  .shop-sidebar--open {
+    display: flex;
   }
   .shop-filter-group {
     flex: 1;
@@ -347,9 +371,6 @@
 }
 
 @media (max-width: 600px) {
-  .shop-sidebar {
-    flex-direction: column;
-  }
   .shop-grid {
     grid-template-columns: 1fr;
   }

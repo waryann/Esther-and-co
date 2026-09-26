@@ -24,6 +24,30 @@
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
+/* Pages sans hero sombre : navbar claire dès le départ (pas de fond noir à traverser) */
+.navbar--light-page:not(.navbar--scrolled) {
+  background: rgba(251, 250, 247, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom-color: var(--border-soft);
+}
+
+.navbar--light-page:not(.navbar--scrolled) .navbar__logo-text,
+.navbar--light-page:not(.navbar--scrolled) .navbar__link--active,
+.navbar--light-page:not(.navbar--scrolled) .navbar__burger span {
+  color: var(--text);
+}
+
+.navbar--light-page:not(.navbar--scrolled) .navbar__link,
+.navbar--light-page:not(.navbar--scrolled) .navbar__icon {
+  color: rgba(28, 26, 23, 0.6);
+}
+
+.navbar--light-page:not(.navbar--scrolled) .navbar__link:hover,
+.navbar--light-page:not(.navbar--scrolled) .navbar__icon:hover {
+  color: var(--text);
+}
+
 /* Logo */
 .navbar__logo {
   text-decoration: none;

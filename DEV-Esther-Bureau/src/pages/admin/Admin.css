@@ -8,7 +8,29 @@
   display: flex;
   min-height: 100vh;
   background: #0a0a0a;
+  color: var(--white);
   font-family: var(--font-sans);
+}
+
+/* Le panel admin reste sombre : on restaure le style clair des boutons partagés */
+.admin-layout .btn-primary {
+  background: var(--white);
+  color: var(--black);
+}
+
+.admin-layout .btn-primary:hover {
+  background: var(--gold);
+  color: var(--black);
+}
+
+.admin-layout .btn-outline {
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-layout .btn-outline:hover {
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 /* --- Sidebar --- */

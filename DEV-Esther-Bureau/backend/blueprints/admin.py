@@ -318,6 +318,7 @@ def create_service():
     service = Service(
         name=data["name"],
         description=data.get("description", ""),
+        image_url=data.get("image_url"),
         price=float(data["price"]),
         duration_minutes=int(data["duration_minutes"]),
         deposit_amount=float(data.get("deposit_amount", 0.0)),
@@ -338,7 +339,7 @@ def update_service(service_id):
     service = Service.query.get_or_404(service_id)
     data = request.json or {}
 
-    for field in ["name", "description", "includes", "conditions"]:
+    for field in ["name", "description", "includes", "conditions", "image_url"]:
         if field in data:
             setattr(service, field, data[field])
     if "price" in data:

@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    host: true, // écoute sur le réseau local (pas seulement localhost) pour tester depuis un téléphone
     // Proxy toutes les requêtes /api/* et /static/* vers le serveur Flask
     proxy: {
       '/api': {

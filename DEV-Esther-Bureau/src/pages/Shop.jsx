@@ -11,6 +11,7 @@ export default function Shop() {
   const [lengthFilter, setLengthFilter] = useState('all')
   const [capFilter, setCapFilter] = useState('all')
   const [sortBy, setSortBy] = useState('featured')
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -71,8 +72,16 @@ export default function Shop() {
       </section>
 
       <div className="shop-container">
+        {/* Bouton filtres (mobile) */}
+        <button
+          className="shop-filter-toggle"
+          onClick={() => setFiltersOpen(!filtersOpen)}
+        >
+          {filtersOpen ? '✕ Fermer les filtres' : '☰ Filtres & tri'}
+        </button>
+
         {/* Barre de filtres */}
-        <aside className="shop-sidebar">
+        <aside className={`shop-sidebar ${filtersOpen ? 'shop-sidebar--open' : ''}`}>
           <div className="shop-filter-group">
             <h3 className="shop-filter-title font-serif">Catégories</h3>
             <div className="shop-filter-options">

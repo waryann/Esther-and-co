@@ -6,23 +6,44 @@
   min-height: 100vh;
   padding-top: 160px;
   padding-bottom: var(--space-xl);
-  background: var(--black);
+  background: var(--bg);
 }
 
 .about__container {
-  max-width: 800px;
+  max-width: 1200px;
+}
+
+.about__grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: var(--space-xl);
+  align-items: center;
+}
+
+.about__image-wrap {
+  overflow: hidden;
+}
+
+.about__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  aspect-ratio: 4/5;
 }
 
 .about__title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
   font-weight: 300;
-  color: var(--white);
+  color: var(--text);
+  line-height: 1.15;
   margin: var(--space-sm) 0 var(--space-lg);
 }
 
 .about__lead {
   font-size: 1.3rem;
-  color: var(--gold-light);
+  color: #A6803F;
   line-height: 1.6;
   margin-bottom: 1.5rem;
   font-family: var(--font-serif);
@@ -30,6 +51,22 @@
 
 .about__text {
   font-size: 1rem;
-  color: var(--grey-100);
+  color: var(--text-soft);
   line-height: 1.8;
+  margin-bottom: 1.1rem;
+}
+
+.about__text--signature {
+  color: #A6803F;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .about__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about__image {
+    aspect-ratio: 4/5;
+  }
 }
