@@ -10,8 +10,35 @@ Architecture :
 """
 import os
 from flask import Flask, jsonify
+from sqlalchemy import inspect, text
 from backend.config import config_by_name
 from backend.extensions import db, login_manager, cors
+
+
+def _sync_missing_columns(db):
+    """
+    db.create_all() crée les tables manquantes mais n'ajoute jamais de colonne
+    à une table déjà existante (pas de système de migration type Alembic ici).
+    On compare donc chaque modèle à la table réelle en base, et on ajoute les
+    colonnes manquantes via ALTER TABLE (compatible SQLite comme Postgres tant
+    que la colonne est nullable, ce qui est le cas de tous nos ajouts).
+    """
+    inspector = inspect(db.engine)
+    existing_tables = set(inspector.get_table_names())
+
+    for model in db.Model.registry.mappers:
+        table = model.local_table
+        if table is None or table.name not in existing_tables:
+            continue
+
+        existing_columns = {col["name"] for col in inspector.get_columns(table.name)}
+        for column in table.columns:
+            if column.name in existing_columns:
+                continue
+            col_type = column.type.compile(dialect=db.engine.dialect)
+            with db.engine.begin() as conn:
+                conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {col_type}'))
+            print(f"➕ Colonne ajoutée : {table.name}.{column.name}")
 
 
 def create_app(config_name: str = "default") -> Flask:
@@ -75,7 +102,7 @@ def create_app(config_name: str = "default") -> Flask:
     app.register_blueprint(payments_bp)
     app.register_blueprint(admin_bp)
 
-    # --- Création des tables SQLite au premier démarrage ---
+    # --- Création des tables au premier démarrage + synchro des colonnes ---
     with app.app_context():
         # Import des modèles pour que SQLAlchemy les découvre
         from backend.models import (
@@ -83,7 +110,8 @@ def create_app(config_name: str = "default") -> Flask:
             Appointment, AppointmentOption, Order, OrderItem,
         )
         db.create_all()
-        print("✅ Base de données SQLite initialisée.")
+        _sync_missing_columns(db)
+        print("✅ Base de données initialisée.")
 
     # --- Route de santé (health check) ---
     @app.route("/api/health")
