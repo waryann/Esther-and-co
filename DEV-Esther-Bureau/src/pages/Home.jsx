@@ -7,10 +7,10 @@ import HeroScene from '../components/animations/HeroScene'
 import { SHOP_ENABLED } from '../config/features'
 import modelBag from '../assets/images/model-bag.jpg'
 import modelBox from '../assets/images/model-box.jpg'
-const gif1 = '/gif/1.gif'
-const gif2 = '/gif/2.gif'
-const gif3 = '/gif/3.gif'
-const gif4 = '/gif/4.gif'
+const gif1 = '/video/1.mp4'
+const gif2 = '/video/2.mp4'
+const gif3 = '/video/3.mp4'
+const gif4 = '/video/4.mp4'
 const modelTurn = modelBox
 
 /* ---- Animation variants ---- */
@@ -239,7 +239,16 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.9, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <img src={gif} alt={`EST'HAIR & CO. — Look ${i + 1}`} className="editorial__gif-img" loading="lazy" />
+              <video
+                src={gif}
+                className="editorial__gif-img"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                aria-label={`EST'HAIR & CO. — Look ${i + 1}`}
+              />
             </motion.div>
           ))}
           <motion.div
