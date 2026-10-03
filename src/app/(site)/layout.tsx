@@ -3,6 +3,9 @@ import { Footer } from "@/components/Footer";
 import { NewsletterPopup } from "@/components/NewsletterPopup";
 import { getSettings } from "@/lib/settings";
 
+// Les pages lisent la base (réglages, catalogue) : jamais pré-générées au build.
+export const dynamic = "force-dynamic";
+
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const s = await getSettings();
   return (
