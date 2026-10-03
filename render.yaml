@@ -3,7 +3,7 @@
 #   le service s'endort après inactivité et la base gratuite est supprimée après 30 jours).
 services:
   - type: web
-    name: esthair-co
+    name: esther-and-co
     runtime: node
     plan: starter
     region: frankfurt
@@ -22,7 +22,7 @@ services:
           name: esthair-db
           property: connectionString
       - key: SITE_URL
-        value: https://esthair-co.onrender.com
+        value: https://esther-and-co.onrender.com
       - key: UPLOAD_DIR
         value: /var/data/uploads
       - key: AUTH_SECRET
@@ -63,11 +63,11 @@ services:
     startCommand: 'curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$SITE_URL/api/cron/reminders"'
     envVars:
       - key: SITE_URL
-        value: https://esthair-co.onrender.com
+        value: https://esther-and-co.onrender.com
       - key: CRON_SECRET
         fromService:
           type: web
-          name: esthair-co
+          name: esther-and-co
           envVarKey: CRON_SECRET
 
 databases:
