@@ -1,0 +1,76 @@
+# Blueprint Render — ESTHAIR & CO.
+# ⚠ Tarifs et plans à vérifier sur render.com avant validation (un site de réservation ne doit pas être sur le plan gratuit :
+#   le service s'endort après inactivité et la base gratuite est supprimée après 30 jours).
+services:
+  - type: web
+    name: esthair-co
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm ci --include=dev && npm run build:render
+    startCommand: npm run start:render
+    healthCheckPath: /
+    disk:
+      name: uploads
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: DATABASE_URL
+        fromDatabase:
+          name: esthair-db
+          property: connectionString
+      - key: SITE_URL
+        value: https://esthair-co.onrender.com
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: PAYMENT_WEBHOOK_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: PAYMENT_PROVIDER
+        value: stripe
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+
+  # Rappels 48 h / 24 h et libération des créneaux verrouillés expirés
+  - type: cron
+    name: esthair-rappels
+    runtime: node
+    plan: starter
+    region: frankfurt
+    schedule: "*/15 * * * *"
+    buildCommand: "true"
+    startCommand: 'curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$SITE_URL/api/cron/reminders"'
+    envVars:
+      - key: SITE_URL
+        value: https://esthair-co.onrender.com
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: esthair-co
+          envVarKey: CRON_SECRET
+
+databases:
+  - name: esthair-db
+    plan: basic-256mb
+    region: frankfurt

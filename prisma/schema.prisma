@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────── Accès admin ─────────────
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String   @default("Admin")
+  createdAt    DateTime @default(now())
+}
+
+// ───────────── Catalogue ─────────────
+model Package {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  shortDescription String           @default("")
+  description      String           @default("")
+  basePrice        Int // en euros entiers
+  depositAmount    Int              @default(50)
+  durationMinutes  Int              @default(180)
+  image            String           @default("")
+  features         String           @default("") // une ligne = une icône/texte
+  active           Boolean          @default(true)
+  sortOrder        Int              @default(0)
+  seoTitle         String           @default("")
+  seoDescription   String           @default("")
+  variants         PackageVariant[]
+  bookings         Booking[]
+}
+
+model PackageVariant {
+  id        String    @id @default(cuid())
+  packageId String
+  package   Package   @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  label     String // ex : 3 paquets 18"
+  bundles   Int       @default(0)
+  length    Int       @default(0) // pouces
+  price     Int
+  active    Boolean   @default(true)
+  sortOrder Int       @default(0)
+  bookings  Booking[]
+}
+
+model Service {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  shortDescription String   @default("")
+  description     String    @default("")
+  price           Int
+  priceFrom       Boolean   @default(true) // affiche « À partir de »
+  depositAmount   Int       @default(20)
+  durationMinutes Int       @default(120)
+  image           String    @default("")
+  features        String    @default("")
+  category        String    @default("service")
+  active          Boolean   @default(true)
+  sortOrder       Int       @default(0)
+  seoTitle        String    @default("")
+  seoDescription  String    @default("")
+  bookings        Booking[]
+}
+
+model ServiceOption {
+  id            String          @id @default(cuid())
+  name          String
+  description   String          @default("")
+  priceModifier Int
+  scope         String          @default("PACKAGE") // PACKAGE | SERVICE | BOTH
+  icon          String          @default("sparkles")
+  image         String          @default("")
+  active        Boolean         @default(true)
+  sortOrder     Int             @default(0)
+  bookings      BookingOption[]
+}
+
+// ───────────── Clientes & réservations ─────────────
+model Customer {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  phone     String
+  createdAt DateTime  @default(now())
+  bookings  Booking[]
+}
+
+model Booking {
+  id                    String          @id @default(cuid())
+  reference             String          @unique // ex : BK1048
+  manageToken           String          @unique
+  customerId            String
+  customer              Customer        @relation(fields: [customerId], references: [id])
+  type                  String // PACKAGE | SERVICE
+  packageId             String?
+  package               Package?        @relation(fields: [packageId], references: [id])
+  variantId             String?
+  variant               PackageVariant? @relation(fields: [variantId], references: [id])
+  serviceId             String?
+  service               Service?        @relation(fields: [serviceId], references: [id])
+  itemName              String // instantané du nom au moment de la réservation
+  variantLabel          String          @default("")
+  options               BookingOption[]
+  date                  String // YYYY-MM-DD (fuseau de l'entreprise)
+  startMin              Int // minutes depuis minuit
+  endMin                Int
+  startTime             String // HH:MM
+  endTime               String
+  totalAmount           Int
+  depositAmount         Int
+  remainingAmount       Int
+  status                String          @default("PENDING_PAYMENT")
+  source                String          @default("WEB") // WEB | ADMIN
+  notes                 String          @default("")
+  adminNotes            String          @default("")
+  lockExpiresAt         DateTime?
+  paymentScreenshotSent Boolean         @default(false)
+  confirmedAt           DateTime?
+  cancelledAt           DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  payments              Payment[]
+  reminders             ReminderLog[]
+
+  @@index([date, status])
+}
+
+model BookingOption {
+  id        String        @id @default(cuid())
+  bookingId String
+  booking   Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  optionId  String?
+  option    ServiceOption? @relation(fields: [optionId], references: [id])
+  name      String
+  price     Int
+}
+
+model Payment {
+  id          String    @id @default(cuid())
+  bookingId   String
+  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  provider    String
+  providerRef String    @default("")
+  method      String    @default("card")
+  amount      Int
+  status      String    @default("PENDING") // PENDING | PAID | FAILED | REFUNDED
+  needsRefund Boolean   @default(false)
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([providerRef])
+}
+
+model ReminderLog {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  hours     Int
+  sentAt    DateTime @default(now())
+
+  @@unique([bookingId, hours])
+}
+
+// ───────────── Disponibilités ─────────────
+model OpeningHour {
+  weekday  Int     @id // 0 = dimanche … 6 = samedi
+  closed   Boolean @default(false)
+  startMin Int     @default(540)
+  endMin   Int     @default(1080)
+}
+
+// Jour exceptionnel : fermé, demi-journée, ou ouverture exceptionnelle
+model AvailabilityException {
+  id       String  @id @default(cuid())
+  date     String  @unique
+  closed   Boolean @default(false)
+  startMin Int     @default(540)
+  endMin   Int     @default(1080)
+  note     String  @default("")
+}
+
+model BlockedSlot {
+  id       String @id @default(cuid())
+  date     String
+  startMin Int
+  endMin   Int
+  reason   String @default("")
+
+  @@index([date])
+}
+
+// ───────────── Contenu ─────────────
+model Review {
+  id           String   @id @default(cuid())
+  firstName    String
+  rating       Int
+  comment      String
+  photo        String   @default("")
+  photoConsent Boolean  @default(false)
+  consentAt    DateTime?
+  status       String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  createdAt    DateTime @default(now())
+}
+
+model BlogCategory {
+  id    String     @id @default(cuid())
+  name  String
+  slug  String     @unique
+  posts BlogPost[]
+}
+
+model BlogPost {
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  excerpt     String       @default("")
+  coverImage  String       @default("")
+  content     String       @default("") // texte simple : paragraphes séparés par une ligne vide, "## " pour un titre
+  categoryId  String?
+  category    BlogCategory? @relation(fields: [categoryId], references: [id])
+  author      String       @default("Esther")
+  status      String       @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  ctaLabel    String       @default("")
+  ctaHref     String       @default("")
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+}
+
+model FaqItem {
+  id        String  @id @default(cuid())
+  question  String
+  answer    String
+  sortOrder Int     @default(0)
+  active    Boolean @default(true)
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String @default("")
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  body      String
+  status    String // SENT | LOGGED | FAILED
+  error     String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  name      String
+  sessionId String   @default("")
+  path      String   @default("")
+  props     String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([name, createdAt])
+}
