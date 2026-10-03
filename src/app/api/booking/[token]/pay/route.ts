@@ -51,6 +51,13 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     const amount = quote.deposit;
 
     const settings = await getSettings();
+    // Paiement non configuré (clés absentes) : message clair, aucun paiement ni verrou prolongé.
+    if (getProvider().name === "stripe" && !process.env.STRIPE_SECRET_KEY) {
+      throw new BookingError(
+        "INVALID",
+        `Le paiement en ligne est momentanément indisponible. Contactez-nous sur Instagram @${settings.instagramHandle} pour finaliser votre réservation.`,
+      );
+    }
     await db.booking.update({
       where: { id: b.id },
       data: { lockExpiresAt: new Date(Date.now() + num(settings.lockMinutes, 10) * 60_000) },
