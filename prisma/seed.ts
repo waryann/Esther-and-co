@@ -14,16 +14,21 @@ const PACK_FEATURES = "Mèches incluses|Prestation incluse|Rendu naturel|Pose ra
 
 async function main() {
   // ── Admin ──
+  // En production, on ne crée un admin que si ADMIN_EMAIL / ADMIN_PASSWORD sont fournis et valides.
+  // Si un admin existe déjà (redémarrage, redéploiement), ces variables ne sont plus nécessaires.
   const email = (process.env.ADMIN_EMAIL || "admin@esthairandco.com").toLowerCase();
   const password = process.env.ADMIN_PASSWORD || "ChangeMe-2024!";
-  if (process.env.NODE_ENV === "production" && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "ChangeMe-2024!" || process.env.ADMIN_PASSWORD.length < 10)) {
-    throw new Error("ADMIN_PASSWORD doit être défini (10 caractères min., différent de la valeur d'exemple) en production.");
+  const prod = process.env.NODE_ENV === "production";
+  const credsOk = !!process.env.ADMIN_EMAIL && !!process.env.ADMIN_PASSWORD && password !== "ChangeMe-2024!" && password.length >= 10;
+  if (!prod || credsOk) {
+    await db.user.upsert({
+      where: { email },
+      update: {},
+      create: { email, passwordHash: await bcrypt.hash(password, 12), name: "Esther" },
+    });
+  } else if ((await db.user.count()) === 0) {
+    throw new Error("Aucun compte admin : définissez ADMIN_EMAIL et ADMIN_PASSWORD (10 caractères min., différent de la valeur d'exemple).");
   }
-  await db.user.upsert({
-    where: { email },
-    update: {},
-    create: { email, passwordHash: await bcrypt.hash(password, 12), name: "Esther" },
-  });
 
   // ── Packs ──
   // Durées : valeurs provisoires (exemples du cahier des charges), modifiables depuis l'admin.
