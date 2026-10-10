@@ -16,13 +16,14 @@ export default function PaymentReturnPage() {
     let tries = 0;
     async function poll() {
       if (stop) return;
-      const r = await api<{ status: string; paymentStatus: string | null }>(`/api/booking/${token}/status`);
+      // Le serveur interroge Stripe directement : pas besoin d'attendre le webhook.
+      const r = await api<{ status: string; paymentStatus: string | null }>(`/api/booking/${token}/verify`, { method: "POST" });
       if (r.ok && (r.data.status === "CONFIRMED" || r.data.status === "COMPLETED")) {
-        return void router.replace(`/paiement/instructions/${token}`);
+        return void router.replace(`/confirmation/${token}`);
       }
       if (r.ok && r.data.paymentStatus === "FAILED") return void setState("failed");
-      if (++tries > 40) return void setState("timeout");
-      setTimeout(poll, 1500);
+      if (++tries > 30) return void setState("timeout");
+      setTimeout(poll, 2000);
     }
     poll();
     return () => { stop = true; };

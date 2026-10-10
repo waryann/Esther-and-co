@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { markPaymentRefunded } from "@/app/admin/actions";
+import { markPaymentRefunded, verifyPaymentWithStripe } from "@/app/admin/actions";
 import { eur } from "@/lib/format";
 import { Badge, Flash, PageHead, Table } from "@/components/admin/ui";
 
@@ -24,6 +24,9 @@ export default async function PaymentsAdmin({ searchParams }: { searchParams: { 
             <td className="px-4 py-3"><Badge status={p.status} />{p.needsRefund && <span className="ml-2 text-[11px] font-medium text-red-700">à rembourser</span>}</td>
             <td className="px-4 py-3">{p.booking.paymentScreenshotSent ? "Oui" : "Non"}</td>
             <td className="px-4 py-3">
+              {p.provider === "stripe" && p.status !== "PAID" && p.status !== "REFUNDED" && (
+                <form action={verifyPaymentWithStripe}><input type="hidden" name="id" value={p.id} /><button className="text-[12px] underline">Vérifier avec Stripe</button></form>
+              )}
               {p.status === "PAID" && <form action={markPaymentRefunded}><input type="hidden" name="id" value={p.id} /><button className="text-[12px] underline">Marquer remboursé</button></form>}
             </td>
           </tr>

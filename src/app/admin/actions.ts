@@ -12,7 +12,7 @@ import { saveImage, UploadError } from "@/lib/upload";
 import { SETTING_DEFAULTS, setSetting, type SettingKey } from "@/lib/settings";
 import { isDateStr, toMin } from "@/lib/time";
 import { isIntervalFree } from "@/lib/availability";
-import { BookingError, cancelBooking, createAdminBooking, rescheduleBooking } from "@/lib/booking";
+import { BookingError, cancelBooking, createAdminBooking, reconcileStripePayment, rescheduleBooking } from "@/lib/booking";
 
 const go = (path: string, msg?: string, error?: string): never => {
   const q = new URLSearchParams();
@@ -444,5 +444,13 @@ export async function changePassword(fd: FormData) {
     if (!(await bcrypt.compare(current, admin.passwordHash))) throw new BookingError("INVALID", "Mot de passe actuel incorrect.");
     await db.user.update({ where: { id: admin.id }, data: { passwordHash: await bcrypt.hash(next, 12) } });
     return "Mot de passe modifié.";
+  });
+}
+
+export async function verifyPaymentWithStripe(fd: FormData) {
+  return safe("/admin/paiements", async () => {
+    const r = await reconcileStripePayment(str(fd, "id"));
+    revalidatePath("/admin", "layout");
+    return r === "PAID" ? "Paiement confirmé par Stripe : réservation confirmée." : r === "FAILED" ? "Stripe indique que ce paiement a échoué ou expiré." : "Stripe indique que ce paiement n'est pas (encore) réglé.";
   });
 }

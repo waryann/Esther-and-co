@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     const b = await getBookingByToken(params.token);
     if (!b) throw new BookingError("NOT_FOUND", "Rendez-vous introuvable.");
     if (b.status === "CONFIRMED" || b.status === "COMPLETED") {
-      return NextResponse.json({ redirectUrl: `/paiement/instructions/${b.manageToken}` });
+      return NextResponse.json({ redirectUrl: `/confirmation/${b.manageToken}` });
     }
     if (b.status !== "PENDING_PAYMENT") throw new BookingError("SESSION_EXPIRED", MESSAGES.SESSION_EXPIRED);
 

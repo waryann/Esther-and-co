@@ -46,7 +46,7 @@ function PaymentInner() {
   }, [b]);
 
   useEffect(() => {
-    if (b && (b.status === "CONFIRMED" || b.status === "COMPLETED")) router.replace(`/paiement/instructions/${token}`);
+    if (b && (b.status === "CONFIRMED" || b.status === "COMPLETED")) router.replace(`/confirmation/${token}`);
   }, [b, token, router]);
 
   if (missing) return <div className="container-page max-w-xl py-10"><ErrorBox>Rendez-vous introuvable.</ErrorBox></div>;

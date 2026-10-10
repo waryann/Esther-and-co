@@ -6,6 +6,7 @@ import { computeQuote, type Quote, type QuoteInput } from "./pricing";
 import { getAvailableSlots, isIntervalFree } from "./availability";
 import { getSettings, num } from "./settings";
 import { fmtMin, isDateStr, toMin, zonedToUtc } from "./time";
+import { fetchStripeSession } from "./payments/stripe";
 import { sendBookingCancelled, sendBookingConfirmation, sendBookingReminder } from "./email";
 
 // ───────────── Erreurs métier (messages affichés tels quels à la cliente) ─────────────
@@ -358,4 +359,36 @@ export async function releasePendingBooking(manageToken: string) {
   const b = await db.booking.findUnique({ where: { manageToken }, include: { payments: true } });
   if (!b || b.status !== "PENDING_PAYMENT" || b.payments.some((p) => p.status === "PAID")) return;
   await db.booking.update({ where: { id: b.id }, data: { status: "EXPIRED", lockExpiresAt: new Date() } });
+}
+
+/**
+ * Vérifie auprès de Stripe l'état d'un paiement encore en attente et applique le résultat.
+ * Idempotent : peut être appelé par le retour de paiement, l'admin ou le cron, en complément du webhook.
+ */
+export async function reconcileStripePayment(paymentId: string): Promise<"PAID" | "FAILED" | "PENDING"> {
+  const p = await db.payment.findUnique({ where: { id: paymentId } });
+  if (!p) return "PENDING";
+  if (p.status === "PAID") return "PAID";
+  if (p.provider !== "stripe" || !p.providerRef) return p.status === "FAILED" ? "FAILED" : "PENDING";
+  const session = await fetchStripeSession(p.providerRef);
+  if (!session) return "PENDING";
+  if (session.payment_status === "paid") {
+    await confirmPayment(p.id, p.providerRef);
+    return "PAID";
+  }
+  if (session.status === "expired") {
+    await failPayment(p.id);
+    return "FAILED";
+  }
+  return "PENDING";
+}
+
+/** Réconcilie tous les paiements Stripe récents encore en attente d'une réservation. */
+export async function reconcilePendingBookingPayments(bookingId: string) {
+  const pays = await db.payment.findMany({
+    where: { bookingId, provider: "stripe", status: { in: ["PENDING", "FAILED"] } },
+    orderBy: { createdAt: "desc" },
+  });
+  for (const p of pays) if ((await reconcileStripePayment(p.id)) === "PAID") return "PAID";
+  return "PENDING";
 }

@@ -52,3 +52,15 @@ export function verifyStripeSignature(raw: string, header: string | null, secret
     return buf.length === expected.length && timingSafeEqual(buf, expected);
   });
 }
+
+/** Interroge directement Stripe (clé secrète côté serveur) : source de vérité indépendante du navigateur et du webhook. */
+export async function fetchStripeSession(sessionId: string): Promise<{ payment_status: string; status: string } | null> {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key || !sessionId.startsWith("cs_")) return null;
+  const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
+    headers: { Authorization: `Bearer ${key}` },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  return (await res.json()) as { payment_status: string; status: string };
+}
