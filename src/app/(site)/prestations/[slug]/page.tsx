@@ -32,7 +32,6 @@ export default async function ServicePage({ params }: { params: { slug: string }
         description={svc.description}
         features={lines(withDuration(svc.features, svc.durationMinutes).replace(/\|/g, "\n"))}
         infoNotes={parseInfoNotes(withDuration(svc.infoNotes, svc.durationMinutes))}
-        bundles={[]}
         variants={[]}
         basePrice={svc.price}
         priceFrom={svc.priceFrom}

@@ -28,7 +28,7 @@ model Package {
   durationMinutes  Int              @default(180)
   image            String           @default("")
   features         String           @default("") // une ligne = une icône/texte
-  bundles          String           @default("") // illustration des paquets : une ligne par paquet, suffixe |balaye pour un paquet balayé
+  bundles          String           @default("") // inutilisé (ancienne illustration supprimée) — conservé pour ne pas supprimer de colonne en production
   active           Boolean          @default(true)
   sortOrder        Int              @default(0)
   seoTitle         String           @default("")

@@ -59,10 +59,10 @@ export function HighlightGrid({ items }: { items: string[] }) {
     <ul className="grid min-w-0 grid-cols-3 gap-x-1 gap-y-4 text-center">
       {items.map((f) => (
         <li key={f} className="flex min-w-0 flex-col items-center gap-2">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-sand text-ink sm:h-[58px] sm:w-[58px]">
-            <FeatureIcon label={f} size={20} />
+          <span className="flex h-[58px] w-[58px] items-center justify-center rounded-full bg-sand text-ink">
+            <FeatureIcon label={f} size={24} />
           </span>
-          <span className="min-w-0 text-[7.5px] font-light uppercase leading-snug tracking-[0.05em] text-[#444] [overflow-wrap:anywhere] sm:text-[9.5px] sm:tracking-[0.1em]">
+          <span className="min-w-0 text-[9.5px] font-light uppercase leading-snug tracking-[0.08em] text-[#444] [overflow-wrap:anywhere]">
             <Label text={f} />
           </span>
         </li>

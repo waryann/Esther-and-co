@@ -23,8 +23,7 @@ describe("catalogue demandé par la cliente (3/10/2026)", () => {
     const pkg = await db.package.findUniqueOrThrow({ where: { slug: "tissage-balayage" } });
     expect(pkg.basePrice).toBe(400);
     expect(pkg.description).toContain("**3 bundles de 20 pouces**");
-    expect(pkg.bundles.split("\n")).toHaveLength(3);
-    expect(pkg.bundles).toContain("|balaye");
+    expect(pkg.features.split("|")).toHaveLength(5);
   });
 
   it("options retirées : Coupe, Soin profond et Baby hair ne sont plus proposées", async () => {

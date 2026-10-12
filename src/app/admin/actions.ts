@@ -63,7 +63,6 @@ export async function savePackage(fd: FormData) {
       depositAmount: int(fd, "depositAmount", 50),
       durationMinutes: int(fd, "durationMinutes", 180),
       features: str(fd, "features"),
-      bundles: str(fd, "bundles"),
       active: bool(fd, "active"),
       sortOrder: int(fd, "sortOrder"),
       seoTitle: str(fd, "seoTitle"),

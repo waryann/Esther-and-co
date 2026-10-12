@@ -7,7 +7,6 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Photo } from "./Photo";
 import { FeatureRow, HighlightGrid } from "./FeatureIcon";
 import { InfoNotes } from "./InfoNotes";
-import { Bundles } from "./Bundles";
 import { RichParagraphs } from "./Rich";
 import { useBooking } from "./BookingProvider";
 import { track } from "@/lib/client";
@@ -25,7 +24,6 @@ export type ProductDetailProps = {
   description: string;
   features: string[];
   infoNotes: string[];
-  bundles: string[];
   variants: Variant[];
   basePrice: number;
   priceFrom: boolean;
@@ -85,12 +83,9 @@ export function ProductDetail(p: ProductDetailProps) {
           <RichParagraphs text={p.description} />
         </div>
 
-        {p.bundles.length > 0 ? (
-          <div className="mt-6 grid items-center gap-6 min-[380px]:grid-cols-[1fr_auto_1.3fr] min-[380px]:gap-3">
-            <Bundles lines={p.bundles} />
-            <div className="hidden h-full w-px bg-line min-[380px]:block" />
-            <HighlightGrid items={p.features} />
-          </div>
+        {isPack && p.features.length > 4 ? (
+          // Packs détaillés (ex. Balayage) : pastilles en cercles, sans aucune image générée.
+          <div className="mt-6 mx-auto max-w-sm"><HighlightGrid items={p.features} /></div>
         ) : (
           <>
             <FeatureRow features={p.features} circles={!isPack} />

@@ -351,7 +351,6 @@ async function main() {
         description:
           "Le Pack Tissage Balayage comprend **3 bundles de 20 pouces** en **Raw Hair vietnamien**, dont **1 bundle balayé**, pour un résultat naturel et lumineux.\n\nLes 3 bundles sont en 20 pouces et la prestation de **tissage ouvert est incluse** dans le prix du pack.",
         features: "3 bundles de 20 pouces **inclus**|Raw Hair **vietnamien**|1 bundle **balayé**|Prestation de tissage **ouvert incluse**|Résultat **naturel et lumineux**",
-        bundles: '20" Raw Hair vietnamien\n20" Raw Hair vietnamien\n20" Raw Hair vietnamien (Balayé)|balaye',
       },
     });
 
