@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ProductDetail } from "@/components/ProductDetail";
 import { PageView } from "@/components/PageView";
 import { getOptionsFor, getServiceBySlug } from "@/lib/catalog";
-import { lines } from "@/lib/format";
+import { lines, parseInfoNotes, withDuration } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,9 @@ export default async function ServicePage({ params }: { params: { slug: string }
         name={svc.name}
         image={svc.image}
         description={svc.description}
-        features={lines(svc.features.replace(/\|/g, "\n"))}
+        features={lines(withDuration(svc.features, svc.durationMinutes).replace(/\|/g, "\n"))}
+        infoNotes={parseInfoNotes(withDuration(svc.infoNotes, svc.durationMinutes))}
+        bundles={[]}
         variants={[]}
         basePrice={svc.price}
         priceFrom={svc.priceFrom}

@@ -8,20 +8,21 @@ vi.mock("@/lib/payments/stripe", async (orig) => ({
 import { db } from "@/lib/db";
 import { createPendingBooking, reconcileStripePayment, reconcilePendingBookingPayments } from "@/lib/booking";
 import { fetchStripeSession } from "@/lib/payments/stripe";
-import { addDays, nowInTz, weekdayOf } from "@/lib/time";
+import { getDayWindow } from "@/lib/availability";
+import { addDays, nowInTz } from "@/lib/time";
 
 const mocked = vi.mocked(fetchStripeSession);
 
-function openDate() {
+async function openDate() {
   let d = addDays(nowInTz("Europe/Brussels").date, 12);
-  while (weekdayOf(d) === 0) d = addDays(d, 1);
+  while (!(await getDayWindow(d))) d = addDays(d, 1);
   return d;
 }
 
 async function pendingWithStripePayment() {
   const pkg = await db.package.findUniqueOrThrow({ where: { slug: "flipover" }, include: { variants: true } });
   const b = await createPendingBooking({
-    type: "PACKAGE", itemId: pkg.id, variantId: pkg.variants[0].id, optionIds: [], date: openDate(), startTime: "09:00",
+    type: "PACKAGE", itemId: pkg.id, variantId: pkg.variants[0].id, optionIds: [], date: await openDate(), startTime: "10:00",
     customer: { name: "Stripe Test", email: "stripe@example.com", phone: "+32 4 612 34 56", notes: "" },
   });
   const p = await db.payment.create({ data: { bookingId: b.id, provider: "stripe", providerRef: "cs_test_123", amount: b.depositAmount } });

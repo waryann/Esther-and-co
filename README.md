@@ -38,6 +38,13 @@ npm run dev                 # http://localhost:3000
 
 Back-office (`/admin`) : Dashboard + entonnoir de conversion · Calendrier jour/semaine/mois · Rendez-vous (créer, déplacer, annuler, confirmer, terminer, no-show, ajout manuel Instagram/DM) · Clients (historique, « Réserver à nouveau ») · Packs + variantes · Prestations · Options · Disponibilités (horaires, jours exceptionnels, créneaux bloqués) · Paiements · Avis (modération) · Blog · FAQ · Newsletter (export CSV) · Paramètres.
 
+## Disponibilités d'Esther (règles du 3/10/2026)
+
+- Créneaux de départ fixes : **10h, 12h, 14h, 16h, 18h** (Admin → Paramètres → « Créneaux proposés »).
+- **Jamais le week-end** ; **mardi et jeudi : dernier créneau 16h** ; **jamais les 2e et 4e mercredis du mois** (groupe CARE) ; **indisponible du 23/10 au 07/11/2026**.
+- Tout est modifiable dans Admin → Disponibilités (jours/créneaux, fermetures récurrentes, périodes d'indisponibilité, créneaux bloqués), sans toucher au code.
+- Le premier démarrage après cette mise à jour applique ces règles **une seule fois** (flags `scheduleV2` / `catalogV2` dans la table Setting) ; vos modifications ultérieures ne sont jamais écrasées.
+
 ## Principes techniques
 
 - **Le backend est la source de vérité.** Le frontend n'envoie que des identifiants (pack, variante, options, date, heure). Prix, durée, acompte, disponibilité et statuts sont recalculés côté serveur (`src/lib/pricing.ts`, `booking.ts`, `availability.ts`).

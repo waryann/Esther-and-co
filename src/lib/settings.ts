@@ -4,6 +4,8 @@ export const SETTING_DEFAULTS = {
   siteName: "ESTHAIR & CO.",
   tagline: "HAIR. BEAUTY. CONFIDENCE.",
   timezone: "Europe/Brussels",
+  // Créneaux de départ proposés (heures fixes). Vide = créneaux générés toutes les `slotIntervalMinutes` dans les horaires.
+  slotTimes: "10:00,12:00,14:00,16:00,18:00",
   slotIntervalMinutes: "60",
   lockMinutes: "10",
   maxDaysAhead: "90",

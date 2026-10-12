@@ -28,6 +28,7 @@ model Package {
   durationMinutes  Int              @default(180)
   image            String           @default("")
   features         String           @default("") // une ligne = une icône/texte
+  bundles          String           @default("") // illustration des paquets : une ligne par paquet, suffixe |balaye pour un paquet balayé
   active           Boolean          @default(true)
   sortOrder        Int              @default(0)
   seoTitle         String           @default("")
@@ -61,6 +62,7 @@ model Service {
   durationMinutes Int       @default(120)
   image           String    @default("")
   features        String    @default("")
+  infoNotes       String    @default("") // « Informations importantes » : une ligne = icone|texte (**gras** possible)
   category        String    @default("service")
   active          Boolean   @default(true)
   sortOrder       Int       @default(0)
@@ -185,6 +187,16 @@ model AvailabilityException {
   startMin Int     @default(540)
   endMin   Int     @default(1080)
   note     String  @default("")
+}
+
+// Fermeture récurrente : ex. « chaque 2e et 4e mercredi du mois » (weekday 3, nth 2 puis 4)
+model RecurringClosure {
+  id      String @id @default(cuid())
+  weekday Int // 0 = dimanche … 6 = samedi
+  nth     Int // 1 = premier, 2 = deuxième… du mois
+  note    String @default("")
+
+  @@unique([weekday, nth])
 }
 
 model BlockedSlot {

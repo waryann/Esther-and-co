@@ -5,7 +5,7 @@ import {
   BookingError, cancelBooking, confirmPayment, createPendingBooking, expireStaleBookings,
   failPayment, rescheduleBooking, sendDueReminders, createAdminBooking,
 } from "@/lib/booking";
-import { getAvailableSlots } from "@/lib/availability";
+import { getAvailableSlots, getAvailableDays, getDayWindow } from "@/lib/availability";
 import { signPayload, verifySignature } from "@/lib/payments";
 import { verifyStripeSignature } from "@/lib/payments/stripe";
 import { addDays, nowInTz, weekdayOf } from "@/lib/time";
@@ -13,9 +13,10 @@ import { createHmac } from "node:crypto";
 
 const customer = { name: "Sarah Test", email: "sarah@example.com", phone: "+32 4 612 34 56", notes: "" };
 
-function openDate(offset = 10) {
+/** Prochain jour réservable (hors week-ends, 2e/4e mercredis, période de congés…) selon les règles du seed. */
+async function openDate(offset = 10, wantWeekday?: number) {
   let d = addDays(nowInTz("Europe/Brussels").date, offset);
-  while (weekdayOf(d) === 0) d = addDays(d, 1); // dimanche fermé dans le seed
+  while (!(await getDayWindow(d)) || (wantWeekday !== undefined && weekdayOf(d) !== wantWeekday)) d = addDays(d, 1);
   return d;
 }
 
@@ -30,10 +31,11 @@ beforeEach(async () => {
   await db.bookingOption.deleteMany();
   await db.booking.deleteMany();
   await db.blockedSlot.deleteMany();
-  await db.availabilityException.deleteMany();
+  // On conserve les fermetures du seed (période de congés) ; on ne supprime que ce que les tests créent.
+  await db.availabilityException.deleteMany({ where: { note: { not: "Indisponible" } } });
   await db.emailLog.deleteMany();
   await db.packageVariant.updateMany({ data: { active: true } });
-  await db.serviceOption.updateMany({ data: { active: true } });
+  await db.serviceOption.updateMany({ where: { name: { in: ["Coloration", "Wavy / boucles"] } }, data: { active: true } });
   await db.package.updateMany({ data: { active: true } });
   await db.setting.deleteMany({ where: { key: { in: ["lockMinutes", "reminderHours"] } } });
 });
@@ -89,7 +91,7 @@ describe("prix dynamique", () => {
   });
 
   it("un changement de prix en admin est détecté après création de la réservation", async () => {
-    const b = await book(openDate(), "09:00");
+    const b = await book(await openDate(), "10:00");
     const { pkg, variant } = await flipover();
     await db.packageVariant.update({ where: { id: variant.id }, data: { price: 340 } });
     const q = await computeQuote({ type: "PACKAGE", itemId: pkg.id, variantId: variant.id });
@@ -101,7 +103,7 @@ describe("prix dynamique", () => {
 
 describe("disponibilités & double réservation", () => {
   it("un seul des deux checkouts simultanés sur le même créneau réussit", async () => {
-    const date = openDate();
+    const date = await openDate();
     const results = await Promise.allSettled([
       book(date, "10:00", { email: "a@example.com" }),
       book(date, "10:00", { email: "b@example.com" }),
@@ -113,30 +115,62 @@ describe("disponibilités & double réservation", () => {
     expect(ko[0].reason.code).toBe("SLOT_TAKEN");
   });
 
-  it("un rendez-vous de 180 min à 10:00 bloque 10:00, 11:00 et 12:00 (pas 13:00)", async () => {
-    const date = openDate();
+  it("créneaux de base 10h/12h/14h/16h/18h : un rendez-vous de 180 min à 10:00 bloque 10:00 et 12:00 (pas 14:00)", async () => {
+    const date = await openDate(10, 1); // un lundi : fenêtre 10:00 → 18:00
+    expect(await getAvailableSlots(date, 180)).toEqual(["10:00", "12:00", "14:00", "16:00", "18:00"]);
     await book(date, "10:00");
     const slots = await getAvailableSlots(date, 180);
-    expect(slots).not.toContain("09:00"); // 09:00–12:00 chevauche
     expect(slots).not.toContain("10:00");
-    expect(slots).not.toContain("11:00");
-    expect(slots).not.toContain("12:00");
-    expect(slots).toContain("13:00");
-    const short = await getAvailableSlots(date, 60);
-    expect(short).toContain("09:00");
-    expect(short).not.toContain("10:00");
-    expect(short).toContain("13:00");
+    expect(slots).not.toContain("12:00"); // 12:00–15:00 chevauche 10:00–13:00
+    expect(slots).toEqual(["14:00", "16:00", "18:00"]);
+    expect(await getAvailableSlots(date, 60)).toEqual(["14:00", "16:00", "18:00"]); // 12:00–13:00 chevauche encore
   });
 
-  it("respecte horaires, jour fermé, exception et créneau bloqué", async () => {
+  it("règles d'Esther : jamais le week-end", async () => {
+    let d = addDays(nowInTz("Europe/Brussels").date, 3);
+    for (let i = 0; i < 14; i++, d = addDays(d, 1)) {
+      if ([0, 6].includes(weekdayOf(d))) expect(await getAvailableSlots(d, 120)).toEqual([]);
+    }
+  });
+
+  it("règles d'Esther : mardi et jeudi limités à 16h (pas de créneau 18h)", async () => {
+    for (const wd of [2, 4]) {
+      const d = await openDate(10, wd);
+      expect(await getAvailableSlots(d, 120)).toEqual(["10:00", "12:00", "14:00", "16:00"]);
+    }
+    const mon = await openDate(10, 1);
+    expect((await getAvailableSlots(mon, 120)).at(-1)).toBe("18:00");
+  });
+
+  it("règles d'Esther : jamais les 2e et 4e mercredis du mois (groupe CARE)", async () => {
+    // mois de décembre 2026 (hors période de congés) : mercredis 2, 9, 16, 23, 30 → 2e = 9, 4e = 23
+    const wednesdays = ["2026-12-02", "2026-12-09", "2026-12-16", "2026-12-23", "2026-12-30"];
+    expect(wednesdays.every((d) => weekdayOf(d) === 3)).toBe(true);
+    const open = await Promise.all(wednesdays.map(async (d) => !!(await getDayWindow(d))));
+    expect(open).toEqual([true, false, true, false, true]);
+    const days = await getAvailableDays(2026, 11, 120);
+    expect(days).not.toContain("2026-12-09");
+    expect(days).not.toContain("2026-12-23");
+    expect(days).toContain("2026-12-16");
+  });
+
+  it("règles d'Esther : indisponible du 23/10 au 07/11/2026 inclus, ouvert avant et après", async () => {
+    for (const d of ["2026-10-23", "2026-10-26", "2026-11-03", "2026-11-06"]) expect(await getDayWindow(d)).toBeNull();
+    expect(await getDayWindow("2026-10-22")).not.toBeNull(); // jeudi
+    expect(await getDayWindow("2026-11-09")).not.toBeNull(); // lundi
+  });
+
+  it("exception : ouverture exceptionnelle, jour fermé et créneau bloqué", async () => {
     let sunday = addDays(nowInTz("Europe/Brussels").date, 3);
     while (weekdayOf(sunday) !== 0) sunday = addDays(sunday, 1);
     expect(await getAvailableSlots(sunday, 120)).toEqual([]);
-    await db.availabilityException.create({ data: { date: sunday, closed: false, startMin: 600, endMin: 780 } });
-    expect(await getAvailableSlots(sunday, 120)).toEqual(["10:00", "11:00"]);
-    await db.blockedSlot.create({ data: { date: sunday, startMin: 660, endMin: 720 } });
+    await db.availabilityException.create({ data: { date: sunday, closed: false, startMin: 600, endMin: 720 } });
+    expect(await getAvailableSlots(sunday, 120)).toEqual(["10:00", "12:00"]); // départs de 10:00 à 12:00 inclus
+    await db.blockedSlot.create({ data: { date: sunday, startMin: 720, endMin: 780 } });
+    expect(await getAvailableSlots(sunday, 120)).toEqual(["10:00"]);
+    await db.blockedSlot.create({ data: { date: sunday, startMin: 600, endMin: 660 } });
     expect(await getAvailableSlots(sunday, 120)).toEqual([]);
-    const date = openDate();
+    const date = await openDate();
     await db.availabilityException.create({ data: { date, closed: true } });
     expect(await getAvailableSlots(date, 60)).toEqual([]);
   });
@@ -149,7 +183,7 @@ describe("disponibilités & double réservation", () => {
 
 describe("verrou temporaire (lock)", () => {
   it("le créneau est verrouillé tant que le verrou est actif puis libéré à l'expiration", async () => {
-    const date = openDate();
+    const date = await openDate();
     const b = await book(date, "14:00");
     expect(b.status).toBe("PENDING_PAYMENT");
     expect(b.lockExpiresAt!.getTime()).toBeGreaterThan(Date.now());
@@ -166,7 +200,7 @@ describe("verrou temporaire (lock)", () => {
 
 describe("paiement & webhook", () => {
   it("paiement réussi → CONFIRMED + email + idempotent", async () => {
-    const b = await book(openDate(), "09:00");
+    const b = await book(await openDate(), "10:00");
     const p = await pay(b.id);
     await confirmPayment(p.id, "ref_1");
     await confirmPayment(p.id, "ref_1"); // webhook rejoué
@@ -183,7 +217,7 @@ describe("paiement & webhook", () => {
   });
 
   it("paiement échoué → la réservation reste PENDING_PAYMENT, aucun email", async () => {
-    const b = await book(openDate(), "09:00");
+    const b = await book(await openDate(), "10:00");
     const p = await pay(b.id);
     await failPayment(p.id);
     expect((await db.payment.findUniqueOrThrow({ where: { id: p.id } })).status).toBe("FAILED");
@@ -192,12 +226,12 @@ describe("paiement & webhook", () => {
   });
 
   it("webhook tardif sur créneau déjà repris → CONFLICT + remboursement à traiter", async () => {
-    const date = openDate();
-    const first = await book(date, "09:00", { email: "late@example.com" });
+    const date = await openDate();
+    const first = await book(date, "10:00", { email: "late@example.com" });
     const p = await pay(first.id);
     await db.booking.update({ where: { id: first.id }, data: { lockExpiresAt: new Date(Date.now() - 1000) } });
     await expireStaleBookings();
-    const winner = await book(date, "09:00", { email: "winner@example.com" });
+    const winner = await book(date, "10:00", { email: "winner@example.com" });
     const wp = await pay(winner.id);
     await confirmPayment(wp.id);
     await confirmPayment(p.id);
@@ -223,40 +257,40 @@ describe("paiement & webhook", () => {
 
 describe("annulation, déplacement, admin, rappels", () => {
   it("l'annulation libère le créneau", async () => {
-    const date = openDate();
-    const b = await book(date, "09:00");
+    const date = await openDate();
+    const b = await book(date, "10:00");
     await confirmPayment((await pay(b.id)).id);
-    expect(await getAvailableSlots(date, 180)).not.toContain("09:00");
+    expect(await getAvailableSlots(date, 180)).not.toContain("10:00");
     await cancelBooking(b.id);
-    expect(await getAvailableSlots(date, 180)).toContain("09:00");
+    expect(await getAvailableSlots(date, 180)).toContain("10:00");
   });
 
   it("le déplacement refuse un créneau occupé et accepte un créneau libre", async () => {
-    const date = openDate();
-    const a = await book(date, "09:00", { email: "a@example.com" });
-    const b = await book(date, "13:00", { email: "b@example.com" });
+    const date = await openDate();
+    const a = await book(date, "10:00", { email: "a@example.com" });
+    const b = await book(date, "14:00", { email: "b@example.com" });
     await confirmPayment((await pay(a.id)).id);
     await confirmPayment((await pay(b.id)).id);
     await expect(rescheduleBooking(b.id, date, "10:00")).rejects.toMatchObject({ code: "SLOT_TAKEN" });
-    await expect(rescheduleBooking(b.id, date, "15:00")).resolves.toBeTruthy();
+    await expect(rescheduleBooking(b.id, date, "16:00")).resolves.toBeTruthy();
   });
 
   it("un rendez-vous créé manuellement par l'admin bloque le calendrier public", async () => {
-    const date = openDate();
+    const date = await openDate();
     const { pkg, variant } = await flipover();
     await createAdminBooking({
-      customer, type: "PACKAGE", itemId: pkg.id, variantId: variant.id, optionIds: [], date, startTime: "09:00",
+      customer, type: "PACKAGE", itemId: pkg.id, variantId: variant.id, optionIds: [], date, startTime: "10:00",
       status: "CONFIRMED", adminNotes: "DM Instagram", force: false,
     });
-    expect(await getAvailableSlots(date, 180)).not.toContain("09:00");
+    expect(await getAvailableSlots(date, 180)).not.toContain("10:00");
     await expect(
       createAdminBooking({ customer, type: "PACKAGE", itemId: pkg.id, variantId: variant.id, optionIds: [], date, startTime: "10:00", status: "CONFIRMED", adminNotes: "", force: false }),
     ).rejects.toMatchObject({ code: "SLOT_TAKEN" });
   });
 
   it("rappels : envoyés une seule fois dans la fenêtre configurée", async () => {
-    const date = openDate(2);
-    const b = await book(date, "09:00");
+    const date = (await openDate(2));
+    const b = await book(date, "10:00");
     await confirmPayment((await pay(b.id)).id);
     await db.emailLog.deleteMany();
     await db.setting.upsert({ where: { key: "reminderHours" }, update: { value: "400,24" }, create: { key: "reminderHours", value: "400,24" } });
@@ -268,7 +302,7 @@ describe("annulation, déplacement, admin, rappels", () => {
   it("refuse des coordonnées invalides", async () => {
     const { pkg, variant } = await flipover();
     await expect(
-      createPendingBooking({ type: "PACKAGE", itemId: pkg.id, variantId: variant.id, optionIds: [], date: openDate(), startTime: "09:00", customer: { ...customer, email: "pas-un-email" } }),
+      createPendingBooking({ type: "PACKAGE", itemId: pkg.id, variantId: variant.id, optionIds: [], date: (await openDate()), startTime: "10:00", customer: { ...customer, email: "pas-un-email" } }),
     ).rejects.toThrow();
   });
 });

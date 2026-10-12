@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Photo } from "./Photo";
-import { FeatureRow } from "./FeatureIcon";
+import { FeatureRow, HighlightGrid } from "./FeatureIcon";
+import { InfoNotes } from "./InfoNotes";
+import { Bundles } from "./Bundles";
+import { RichParagraphs } from "./Rich";
 import { useBooking } from "./BookingProvider";
 import { track } from "@/lib/client";
 import { eur } from "@/lib/format";
@@ -21,6 +24,8 @@ export type ProductDetailProps = {
   image: string;
   description: string;
   features: string[];
+  infoNotes: string[];
+  bundles: string[];
   variants: Variant[];
   basePrice: number;
   priceFrom: boolean;
@@ -60,7 +65,7 @@ export function ProductDetail(p: ProductDetailProps) {
   return (
     <div className="md:container-page md:grid md:grid-cols-2 md:gap-10 md:py-10">
       <div className="relative">
-        <Photo src={p.image} alt={p.name} priority className="aspect-square md:aspect-[4/5]" />
+        <Photo src={p.image} alt={p.name} priority className="aspect-[3/2] md:aspect-[4/5]" />
         <Link href={back} aria-label="Retour" className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/85 md:hidden">
           <ArrowLeft size={17} />
         </Link>
@@ -68,15 +73,32 @@ export function ProductDetail(p: ProductDetailProps) {
 
       <div className="-mt-6 rounded-t-[22px] bg-cream px-5 pb-28 pt-6 md:mt-0 md:rounded-none md:px-0 md:pb-0 md:pt-2">
         <Link href={back} className="mb-3 hidden items-center gap-1 text-[12px] text-taupe md:inline-flex"><ArrowLeft size={14} /> Retour</Link>
-        <h1 className="h-display animate-fade-up text-[32px] md:text-[40px]">{p.name}</h1>
-        <p className="mt-1 text-[14px]">
+        <h1 className="h-display animate-fade-up text-[34px] leading-[1.05] md:text-[44px]">{p.name}</h1>
+        <p className="mt-2 text-[16px]">
           {isPack || p.priceFrom ? "À partir de " : ""}
-          <span className="font-medium">{eur(isPack ? Math.min(...(p.variants.length ? p.variants.map((v) => v.price) : [p.basePrice])) : p.basePrice)}</span>
+          <span className="font-semibold">{eur(isPack ? Math.min(...(p.variants.length ? p.variants.map((v) => v.price) : [p.basePrice])) : p.basePrice)}</span>
         </p>
-        {isPack && <p className="mt-1 font-serif text-[17px] text-[#555] md:hidden">Mèches + prestation incluses</p>}
-        <p className="mt-3 text-[13.5px] leading-relaxed text-[#444]">{p.description}</p>
+        {isPack && (
+          <p className="mt-3 border-t border-line pt-3 text-[11px] font-light uppercase tracking-[0.3em] text-[#555]">Mèches + prestation incluses</p>
+        )}
+        <div className="mt-3 space-y-3 text-[14px] leading-relaxed text-[#333]">
+          <RichParagraphs text={p.description} />
+        </div>
 
-        <FeatureRow features={p.features} />
+        {p.bundles.length > 0 ? (
+          <div className="mt-6 grid items-center gap-6 min-[380px]:grid-cols-[1fr_auto_1.3fr] min-[380px]:gap-3">
+            <Bundles lines={p.bundles} />
+            <div className="hidden h-full w-px bg-line min-[380px]:block" />
+            <HighlightGrid items={p.features} />
+          </div>
+        ) : (
+          <>
+            <FeatureRow features={p.features} circles={!isPack} />
+            {!isPack && <div className="border-t border-line" />}
+          </>
+        )}
+        <InfoNotes notes={p.infoNotes} />
+        <div className="h-4" />
 
         {p.variants.length > 0 && (
           <fieldset className="mt-1">

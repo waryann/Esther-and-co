@@ -28,7 +28,8 @@ export default async function SettingsAdmin({ searchParams }: { searchParams: { 
         <Section title="Réservation" section="booking">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Fuseau horaire" name="timezone" defaultValue={s.timezone} hint="Ex. Europe/Brussels" />
-            <Field label="Intervalle entre créneaux (min)" name="slotIntervalMinutes" type="number" defaultValue={s.slotIntervalMinutes} />
+            <Field label="Créneaux proposés (heures de départ)" name="slotTimes" defaultValue={s.slotTimes} hint="Ex. 10:00,12:00,14:00,16:00,18:00. Vide = créneaux toutes les X minutes." className="col-span-2" />
+            <Field label="Intervalle entre créneaux (min) — si aucune heure fixe" name="slotIntervalMinutes" type="number" defaultValue={s.slotIntervalMinutes} />
             <Field label="Durée du verrou de créneau (min)" name="lockMinutes" type="number" defaultValue={s.lockMinutes} hint="Pendant le paiement" />
             <Field label="Réservation possible jusqu'à (jours)" name="maxDaysAhead" type="number" defaultValue={s.maxDaysAhead} />
             <Field label="Préavis minimum (heures)" name="minNoticeHours" type="number" defaultValue={s.minNoticeHours} />

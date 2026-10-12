@@ -10,7 +10,7 @@ import { bool, file, int, str } from "@/lib/form";
 import { slugify } from "@/lib/format";
 import { saveImage, UploadError } from "@/lib/upload";
 import { SETTING_DEFAULTS, setSetting, type SettingKey } from "@/lib/settings";
-import { isDateStr, toMin } from "@/lib/time";
+import { addDays, isDateStr, toMin } from "@/lib/time";
 import { isIntervalFree } from "@/lib/availability";
 import { BookingError, cancelBooking, createAdminBooking, reconcileStripePayment, rescheduleBooking } from "@/lib/booking";
 
@@ -63,6 +63,7 @@ export async function savePackage(fd: FormData) {
       depositAmount: int(fd, "depositAmount", 50),
       durationMinutes: int(fd, "durationMinutes", 180),
       features: str(fd, "features"),
+      bundles: str(fd, "bundles"),
       active: bool(fd, "active"),
       sortOrder: int(fd, "sortOrder"),
       seoTitle: str(fd, "seoTitle"),
@@ -128,6 +129,7 @@ export async function saveService(fd: FormData) {
       depositAmount: int(fd, "depositAmount", 20),
       durationMinutes: int(fd, "durationMinutes", 120),
       features: str(fd, "features"),
+      infoNotes: String(fd.get("infoNotes") ?? "").trim(),
       active: bool(fd, "active"),
       sortOrder: int(fd, "sortOrder"),
       seoTitle: str(fd, "seoTitle"),
@@ -265,9 +267,9 @@ export async function markPaymentRefunded(fd: FormData) {
 export async function saveHours(fd: FormData) {
   return safe("/admin/disponibilites", async () => {
     for (let d = 0; d < 7; d++) {
-      const start = toMin(str(fd, `start${d}`) || "09:00");
+      const start = toMin(str(fd, `start${d}`) || "10:00");
       const end = toMin(str(fd, `end${d}`) || "18:00");
-      if (end <= start) throw new BookingError("INVALID", "L'heure de fin doit être après l'heure de début.");
+      if (end < start) throw new BookingError("INVALID", "Le dernier créneau doit être après le premier.");
       await db.openingHour.upsert({
         where: { weekday: d },
         update: { closed: bool(fd, `closed${d}`), startMin: start, endMin: end },
@@ -281,17 +283,43 @@ export async function saveHours(fd: FormData) {
 export async function addException(fd: FormData) {
   return safe("/admin/disponibilites", async () => {
     const date = str(fd, "date");
-    if (!isDateStr(date)) throw new BookingError("INVALID", "Date invalide.");
+    const endDate = str(fd, "endDate") || date; // période : du « date » au « endDate » inclus
+    if (!isDateStr(date) || !isDateStr(endDate)) throw new BookingError("INVALID", "Date invalide.");
+    if (endDate < date) throw new BookingError("INVALID", "La date de fin doit être après la date de début.");
     const closed = bool(fd, "closed");
-    const startMin = toMin(str(fd, "start") || "09:00");
+    const startMin = toMin(str(fd, "start") || "10:00");
     const endMin = toMin(str(fd, "end") || "18:00");
-    if (!closed && endMin <= startMin) throw new BookingError("INVALID", "L'heure de fin doit être après l'heure de début.");
-    await db.availabilityException.upsert({
-      where: { date },
-      update: { closed, startMin, endMin, note: str(fd, "note") },
-      create: { date, closed, startMin, endMin, note: str(fd, "note") },
+    if (!closed && endMin < startMin) throw new BookingError("INVALID", "Le dernier créneau doit être après le premier.");
+    let n = 0;
+    for (let d = date; d <= endDate && n < 400; d = addDays(d, 1), n++) {
+      await db.availabilityException.upsert({
+        where: { date: d },
+        update: { closed, startMin, endMin, note: str(fd, "note") },
+        create: { date: d, closed, startMin, endMin, note: str(fd, "note") },
+      });
+    }
+    return n > 1 ? `${n} jours enregistrés.` : "Jour exceptionnel enregistré.";
+  });
+}
+
+export async function addRecurringClosure(fd: FormData) {
+  return safe("/admin/disponibilites", async () => {
+    const weekday = int(fd, "weekday", -1);
+    const nth = int(fd, "nth", 0);
+    if (weekday < 0 || weekday > 6 || nth < 1 || nth > 5) throw new BookingError("INVALID", "Choisissez un jour et un rang valides.");
+    await db.recurringClosure.upsert({
+      where: { weekday_nth: { weekday, nth } },
+      update: { note: str(fd, "note") },
+      create: { weekday, nth, note: str(fd, "note") },
     });
-    return "Jour exceptionnel enregistré.";
+    return "Fermeture récurrente ajoutée.";
+  });
+}
+
+export async function deleteRecurringClosure(fd: FormData) {
+  return safe("/admin/disponibilites", async () => {
+    await db.recurringClosure.delete({ where: { id: str(fd, "id") } });
+    return "Fermeture récurrente supprimée.";
   });
 }
 
@@ -299,6 +327,14 @@ export async function deleteException(fd: FormData) {
   return safe("/admin/disponibilites", async () => {
     await db.availabilityException.delete({ where: { id: str(fd, "id") } });
     return "Jour exceptionnel supprimé.";
+  });
+}
+
+export async function deleteExceptionPeriod(fd: FormData) {
+  return safe("/admin/disponibilites", async () => {
+    const ids = str(fd, "ids").split(",").filter(Boolean);
+    await db.availabilityException.deleteMany({ where: { id: { in: ids } } });
+    return `Période supprimée (${ids.length} jours).`;
   });
 }
 

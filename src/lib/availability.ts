@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "./db";
 import { getSettings, num } from "./settings";
-import { addDays, daysInMonth, fmtMin, isDateStr, nowInTz, pad, weekdayOf } from "./time";
+import { addDays, daysInMonth, fmtMin, isDateStr, nowInTz, pad, toMin, weekdayOf } from "./time";
 
 type Client = PrismaClient | Prisma.TransactionClient;
 
@@ -10,9 +10,29 @@ export type Interval = { startMin: number; endMin: number };
 /** Statuts qui occupent le calendrier. PENDING_PAYMENT n'occupe que tant que le verrou n'a pas expiré. */
 const BLOCKING = ["CONFIRMED", "COMPLETED", "NO_SHOW", "CONFLICT"];
 
+/** « 10:00,12:00,14:00 » → minutes triées (liste vide si non défini ou invalide). */
+export function parseSlotTimes(value: string): number[] {
+  return Array.from(
+    new Set(
+      value
+        .split(",")
+        .map((x) => x.trim())
+        .filter((x) => /^\d{1,2}:\d{2}$/.test(x))
+        .map(toMin),
+    ),
+  ).sort((a, b) => a - b);
+}
+
+/** Rang du jour dans le mois pour son jour de semaine (1 = premier mercredi, 2 = deuxième…). */
+export const nthWeekdayOfMonth = (date: string) => Math.ceil(Number(date.slice(8, 10)) / 7);
+
+export const isRecurringClosed = (date: string, rules: { weekday: number; nth: number }[]) =>
+  rules.some((r) => r.weekday === weekdayOf(date) && r.nth === nthWeekdayOfMonth(date));
+
 export async function getDayWindow(date: string, c: Client = db): Promise<Interval | null> {
   const exc = await c.availabilityException.findUnique({ where: { date } });
   if (exc) return exc.closed ? null : { startMin: exc.startMin, endMin: exc.endMin };
+  if (isRecurringClosed(date, await c.recurringClosure.findMany())) return null;
   const oh = await c.openingHour.findUnique({ where: { weekday: weekdayOf(date) } });
   if (!oh || oh.closed) return null;
   return { startMin: oh.startMin, endMin: oh.endMin };
@@ -43,15 +63,30 @@ export async function getBusyIntervals(
 
 export const overlaps = (a: Interval, b: Interval) => a.startMin < b.endMin && a.endMin > b.startMin;
 
-/** Fonction pure : créneaux de départ possibles dans une fenêtre, hors périodes occupées. */
+/**
+ * Fonction pure : créneaux de départ possibles, hors périodes occupées.
+ * - Avec `slotTimes` (heures fixes, ex. 10h/12h/14h/16h/18h) : la fenêtre du jour est la plage des DÉPARTS autorisés
+ *   (premier / dernier créneau) ; la durée n'a pas à tenir avant la fermeture.
+ * - Sans `slotTimes` : créneaux toutes les `intervalMin`, la prestation devant se terminer avant la fin de la fenêtre.
+ */
 export function computeSlots(
   window: Interval | null,
   busy: Interval[],
   durationMin: number,
   intervalMin: number,
   earliestStartMin = 0,
+  slotTimes: number[] = [],
 ): number[] {
   if (!window) return [];
+  if (slotTimes.length) {
+    return slotTimes.filter(
+      (s) =>
+        s >= window.startMin &&
+        s <= window.endMin &&
+        s >= earliestStartMin &&
+        !busy.some((b) => overlaps({ startMin: s, endMin: s + durationMin }, b)),
+    );
+  }
   const out: number[] = [];
   for (let s = window.startMin; s + durationMin <= window.endMin; s += intervalMin) {
     if (s < earliestStartMin) continue;
@@ -98,7 +133,7 @@ export async function getAvailableSlots(
     getDayWindow(date),
     getBusyIntervals(date, db, opts.excludeBookingId),
   ]);
-  return computeSlots(window, busy, durationMin, num(s.slotIntervalMinutes, 60), earliest).map(fmtMin);
+  return computeSlots(window, busy, durationMin, num(s.slotIntervalMinutes, 60), earliest, parseSlotTimes(s.slotTimes)).map(fmtMin);
 }
 
 /** Jours d'un mois ayant au moins un créneau disponible. */
@@ -110,11 +145,12 @@ export async function getAvailableDays(
 ): Promise<string[]> {
   const s = await getSettings();
   const interval = num(s.slotIntervalMinutes, 60);
+  const slotTimes = parseSlotTimes(s.slotTimes);
   const n = daysInMonth(year, month0);
   const first = `${year}-${pad(month0 + 1)}-01`;
   const last = `${year}-${pad(month0 + 1)}-${pad(n)}`;
   const now = new Date();
-  const [exceptions, hours, bookings, blocked] = await Promise.all([
+  const [exceptions, hours, bookings, blocked, recurring] = await Promise.all([
     db.availabilityException.findMany({ where: { date: { gte: first, lte: last } } }),
     db.openingHour.findMany(),
     db.booking.findMany({
@@ -126,6 +162,7 @@ export async function getAvailableDays(
       select: { date: true, startMin: true, endMin: true },
     }),
     db.blockedSlot.findMany({ where: { date: { gte: first, lte: last } } }),
+    db.recurringClosure.findMany(),
   ]);
   const excMap = new Map(exceptions.map((e) => [e.date, e]));
   const hourMap = new Map(hours.map((h) => [h.weekday, h]));
@@ -137,12 +174,13 @@ export async function getAvailableDays(
     const exc = excMap.get(date);
     let window: Interval | null;
     if (exc) window = exc.closed ? null : { startMin: exc.startMin, endMin: exc.endMin };
+    else if (isRecurringClosed(date, recurring)) window = null;
     else {
       const oh = hourMap.get(weekdayOf(date));
       window = !oh || oh.closed ? null : { startMin: oh.startMin, endMin: oh.endMin };
     }
     const busy = [...bookings, ...blocked].filter((b) => b.date === date);
-    if (computeSlots(window, busy, durationMin, interval, earliest).length) result.push(date);
+    if (computeSlots(window, busy, durationMin, interval, earliest, slotTimes).length) result.push(date);
   }
   return result;
 }

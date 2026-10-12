@@ -32,6 +32,8 @@ export default async function PackPage({ params }: { params: { slug: string } })
         image={pack.image}
         description={pack.description}
         features={lines(pack.features.replace(/\|/g, "\n"))}
+        infoNotes={[]}
+        bundles={lines(pack.bundles)}
         variants={pack.variants.map((v) => ({ id: v.id, label: v.label, price: v.price }))}
         basePrice={pack.basePrice}
         priceFrom

@@ -18,7 +18,8 @@ export default async function ServiceEdit({ params, searchParams }: { params: { 
           <Field label="Nom" name="name" defaultValue={s.name} required />
           <Field label="Slug (URL)" name="slug" defaultValue={s.slug} />
           <TextArea label="Description" name="description" defaultValue={s.description} />
-          <TextArea label="Points clés (une ligne par élément)" name="features" defaultValue={s.features.replace(/\|/g, "\n")} rows={4} />
+          <TextArea label="Points clés (une ligne par élément)" name="features" defaultValue={s.features.replace(/\|/g, "\n")} rows={4} hint={"**gras** possible. {duration} = durée de la prestation (ex. « Durabilité **{duration}** » → 2 heures)."} />
+          <TextArea label="Informations importantes (une note par ligne : icone|texte)" name="infoNotes" defaultValue={s.infoNotes} rows={7} hint={"Icônes : calendar, braids, shower, dryer, clock. **gras** possible, {duration} = durée. Une ligne sans icône continue la note précédente."} />
           <div className="grid grid-cols-2 gap-3">
             <Field label="Prix (€)" name="price" type="number" defaultValue={s.price} />
             <Field label="Acompte (€)" name="depositAmount" type="number" defaultValue={s.depositAmount} />

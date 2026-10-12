@@ -284,6 +284,92 @@ async function main() {
     });
   }
 
+  // ═════════ Mises à jour de données appliquées UNE SEULE FOIS (ne réécrasent pas les modifications faites ensuite dans l'admin) ═════════
+  async function applyOnce(flag: string, fn: () => Promise<void>) {
+    const done = await db.setting.findUnique({ where: { key: flag } });
+    if (done) return;
+    await fn();
+    await db.setting.create({ data: { key: flag, value: new Date().toISOString() } });
+  }
+
+  // Règles d'Esther (3/10/2026) : jamais le week-end ; mardi et jeudi limités à 16 h ; jamais les 2e et 4e mercredis ;
+  // créneaux 10h/12h/14h/16h/18h ; indisponible du 23/10 au 07/11/2026.
+  await applyOnce("scheduleV2", async () => {
+    for (let d = 0; d < 7; d++) {
+      const weekend = d === 0 || d === 6;
+      await db.openingHour.upsert({
+        where: { weekday: d },
+        update: { closed: weekend, startMin: 600, endMin: d === 2 || d === 4 ? 960 : 1080 },
+        create: { weekday: d, closed: weekend, startMin: 600, endMin: d === 2 || d === 4 ? 960 : 1080 },
+      });
+    }
+    for (const nth of [2, 4]) {
+      await db.recurringClosure.upsert({
+        where: { weekday_nth: { weekday: 3, nth } },
+        update: {},
+        create: { weekday: 3, nth, note: "Groupe CARE" },
+      });
+    }
+    for (let day = new Date("2026-10-23T00:00:00Z"); day <= new Date("2026-11-07T00:00:00Z"); day = new Date(day.getTime() + 86400_000)) {
+      const date = day.toISOString().slice(0, 10);
+      await db.availabilityException.upsert({
+        where: { date },
+        update: { closed: true, note: "Indisponible" },
+        create: { date, closed: true, note: "Indisponible" },
+      });
+    }
+    await db.setting.upsert({ where: { key: "slotTimes" }, update: { value: "10:00,12:00,14:00,16:00,18:00" }, create: { key: "slotTimes", value: "10:00,12:00,14:00,16:00,18:00" } });
+  });
+
+  // Contenus et prix demandés par la cliente (maquettes du 3/10/2026).
+  await applyOnce("catalogV2", async () => {
+    const SVC_FEATURES_V2 = "Pose incluse|Rendu naturel|Durabilité **{duration}**|Possibilité de personnalisation";
+    const NOTES_WIG = [
+      "calendar|La perruque doit être déposée **48 heures avant** votre rendez-vous afin que nous puissions la préparer correctement.",
+      "braids|Merci de venir avec des nattes.\nSi ce n'est pas le cas, un **supplément de 10€** sera ajouté lors du rendez-vous.",
+      "shower|Il est important de venir avec une **tête propre et lavée**.",
+    ].join("\n");
+    const NOTES_OPEN = [
+      "shower|Il est demandé de venir avec les **cheveux propres et étirés** afin d'assurer une pose optimale.",
+      "dryer|Si les cheveux ne sont pas étirés, un brushing sera réalisé pour un **supplément de 15€** lors du rendez-vous.",
+      "clock|La durée de la prestation est de **{duration}**.",
+    ].join("\n");
+
+    await db.service.updateMany({ where: { slug: "pose-perruque" }, data: { price: 70, durationMinutes: 120, features: SVC_FEATURES_V2, infoNotes: NOTES_WIG, description: "Une pose de perruque soignée pour un rendu naturel et confortable." } });
+    await db.service.updateMany({ where: { slug: "pose-perruque-closure" }, data: { price: 65, durationMinutes: 120, features: SVC_FEATURES_V2, infoNotes: NOTES_WIG, description: "Pose de perruque avec closure pour une finition naturelle au niveau de la raie." } });
+    await db.service.updateMany({ where: { slug: "tissage-ouvert" }, data: { price: 80, durationMinutes: 180, features: SVC_FEATURES_V2, infoNotes: NOTES_OPEN, description: "Un tissage ouvert réalisé avec soin pour un rendu fluide et naturel." } });
+
+    // Titres SEO : reprennent les nouveaux prix.
+    for (const [slug, name, price] of [["pose-perruque", "Pose perruque", 70], ["pose-perruque-closure", "Pose perruque closure", 65], ["tissage-ouvert", "Tissage ouvert", 80]] as const) {
+      await db.service.updateMany({ where: { slug }, data: { seoTitle: `${name} à partir de ${price}€ | ESTHAIR & CO.` } });
+    }
+
+    await db.package.updateMany({
+      where: { slug: "tissage-balayage" },
+      data: {
+        basePrice: 400,
+        description:
+          "Le Pack Tissage Balayage comprend **3 bundles de 20 pouces** en **Raw Hair vietnamien**, dont **1 bundle balayé**, pour un résultat naturel et lumineux.\n\nLes 3 bundles sont en 20 pouces et la prestation de **tissage ouvert est incluse** dans le prix du pack.",
+        features: "3 bundles de 20 pouces **inclus**|Raw Hair **vietnamien**|1 bundle **balayé**|Prestation de tissage **ouvert incluse**|Résultat **naturel et lumineux**",
+        bundles: '20" Raw Hair vietnamien\n20" Raw Hair vietnamien\n20" Raw Hair vietnamien (Balayé)|balaye',
+      },
+    });
+
+    const closure = await db.package.findUnique({ where: { slug: "tissage-closure" } });
+    if (closure && (await db.packageVariant.count({ where: { packageId: closure.id } })) === 0) {
+      await db.packageVariant.createMany({
+        data: [
+          { label: "20 pouces", bundles: 0, length: 20, price: 350, sortOrder: 0 },
+          { label: "22 pouces", bundles: 0, length: 22, price: 365, sortOrder: 1 },
+          { label: "24 pouces", bundles: 0, length: 24, price: 385, sortOrder: 2 },
+        ].map((v) => ({ ...v, packageId: closure.id })),
+      });
+    }
+
+    // Options retirées (désactivées, réactivables depuis l'admin) : Coupe, Soin profond, Baby hair.
+    await db.serviceOption.updateMany({ where: { name: { in: ["Coupe", "Soin profond", "Baby hair"] } }, data: { active: false } });
+  });
+
   // ── Réglages par défaut ──
   await db.setting.upsert({ where: { key: "bookingCounter" }, update: {}, create: { key: "bookingCounter", value: "1000" } });
 

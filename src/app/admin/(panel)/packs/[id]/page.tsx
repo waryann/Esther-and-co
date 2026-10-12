@@ -19,8 +19,9 @@ export default async function PackEdit({ params, searchParams }: { params: { id:
             <Field label="Nom" name="name" defaultValue={p.name} required />
             <Field label="Slug (URL)" name="slug" defaultValue={p.slug} />
             <Field label="Sous-titre" name="shortDescription" defaultValue={p.shortDescription} />
-            <TextArea label="Description" name="description" defaultValue={p.description} />
-            <TextArea label="Ce qui est inclus (une ligne par élément)" name="features" defaultValue={p.features.replace(/\|/g, "\n")} rows={4} />
+            <TextArea label="Description" name="description" defaultValue={p.description} rows={6} hint="Paragraphes séparés par une ligne vide. **gras** possible." />
+            <TextArea label="Ce qui est inclus (une ligne par élément)" name="features" defaultValue={p.features.replace(/\|/g, "\n")} rows={4} hint="**gras** possible." />
+            <TextArea label="Illustration des paquets (une ligne par paquet, facultatif)" name="bundles" defaultValue={p.bundles} rows={3} hint={'Ex. : 20" Raw Hair vietnamien. Ajoutez |balaye à la fin pour un paquet balayé.'} />
             <div className="grid grid-cols-2 gap-3">
               <Field label="Prix de base (€)" name="basePrice" type="number" defaultValue={p.basePrice} hint="Utilisé si le pack n'a pas de variante" />
               <Field label="Acompte (€)" name="depositAmount" type="number" defaultValue={p.depositAmount} />
