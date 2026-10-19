@@ -20,6 +20,7 @@ function Section({ title, section, children }: { title: string; section: string;
 export default async function SettingsAdmin({ searchParams }: { searchParams: { msg?: string; error?: string } }) {
   const s = await getSettings();
   const emails = await db.emailLog.findMany({ orderBy: { createdAt: "desc" }, take: 15 });
+  const sms = await db.smsLog.findMany({ orderBy: { createdAt: "desc" }, take: 15 });
   return (
     <>
       <PageHead title="Paramètres" sub="Tout ce qui peut changer avec le temps est modifiable ici, sans toucher au code." />
@@ -89,6 +90,20 @@ export default async function SettingsAdmin({ searchParams }: { searchParams: { 
             <td className="px-4 py-3">{e.to}</td>
             <td className="px-4 py-3">{e.subject}</td>
             <td className="px-4 py-3 text-[12px]">{e.status === "LOGGED" ? "Journalisé (SMTP non configuré)" : e.status}</td>
+          </tr>
+        ))}
+      </Table>
+
+      <h2 className="mb-3 mt-8 text-[12px] font-semibold uppercase tracking-[0.14em] text-taupe">Journal des SMS (15 derniers)</h2>
+      <Table head={["Date", "Numéro", "Message", "Statut"]} empty={sms.length ? undefined : "Aucun SMS envoyé."}>
+        {sms.map((m) => (
+          <tr key={m.id}>
+            <td className="whitespace-nowrap px-4 py-3">{m.createdAt.toLocaleString("fr-BE")}</td>
+            <td className="px-4 py-3">{m.to}</td>
+            <td className="px-4 py-3">{m.body}</td>
+            <td className="px-4 py-3 text-[12px]" title={m.error || undefined}>
+              {m.status === "LOGGED" ? "Journalisé (Brevo non configuré)" : m.status === "SKIPPED" ? "Ignoré (numéro invalide)" : m.status}
+            </td>
           </tr>
         ))}
       </Table>

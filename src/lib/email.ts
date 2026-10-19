@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { db } from "./db";
 import { getSettings } from "./settings";
-import { eurSpaced } from "./format";
+import { eurSpaced, parseInfoNotes, withDuration } from "./format";
 import { formatDateFr } from "./time";
 
 export const SITE_URL = () => process.env.SITE_URL || "http://localhost:3000";
@@ -44,7 +44,30 @@ type BookingForEmail = {
   remainingAmount: number;
   options: { name: string; price: number }[];
   customer: { name: string; email: string };
+  service?: { infoNotes: string; durationMinutes: number } | null;
 };
+
+const escapeHtml = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** Les « Informations importantes » affichées sur la page de la prestation (suppléments, tête propre…), sans l'icône. */
+function importantNotes(b: BookingForEmail): string[] {
+  if (!b.service?.infoNotes) return [];
+  return parseInfoNotes(withDuration(b.service.infoNotes, b.service.durationMinutes)).map((n) => n.split("|").slice(1).join("|").trim());
+}
+
+function notesHtml(notes: string[]) {
+  if (!notes.length) return "";
+  const items = notes
+    .map((n) => `<li style="margin:0 0 10px">${escapeHtml(n).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>")}</li>`)
+    .join("");
+  return `<div style="background:#F6EFE5;border:1px solid #E6DCCD;padding:18px 20px;margin-top:22px">
+    <p style="margin:0 0 12px;font-family:Georgia,serif;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#0B0B0B">Informations importantes</p>
+    <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.55;color:#333">${items}</ul>
+  </div>`;
+}
+
+const notesText = (notes: string[]) =>
+  notes.length ? `\n\nINFORMATIONS IMPORTANTES\n${notes.map((n) => `- ${n.replace(/\*\*/g, "").replace(/\n/g, " ")}`).join("\n")}` : "";
 
 function layout(title: string, rows: [string, string][], extra: string, link: string) {
   const trs = rows
@@ -81,23 +104,25 @@ export async function sendBookingConfirmation(b: BookingForEmail) {
   const s = await getSettings();
   const rows = await bookingRows(b);
   const link = `${SITE_URL()}/rendez-vous/${b.manageToken}`;
-  const extra = `<p style="font-size:14px;line-height:1.6;color:#333;margin-top:20px">Merci d'envoyer une capture d'écran de votre preuve de paiement sur Instagram <b>@${s.instagramHandle}</b> afin que nous puissions garder une trace de votre paiement.</p>${
+  const notes = importantNotes(b);
+  const extra = `${notesHtml(notes)}<p style="font-size:14px;line-height:1.6;color:#333;margin-top:20px">Merci d'envoyer une capture d'écran de votre preuve de paiement sur Instagram <b>@${s.instagramHandle}</b> afin que nous puissions garder une trace de votre paiement.</p>${
     s.bookingPolicy
       ? `<p style="font-size:13px;line-height:1.6;color:#555"><b>Politique de réservation :</b> ${s.bookingPolicy}</p>`
       : ""
   }`;
   const subject = "Votre rendez-vous ESTHAIR & CO. est confirmé 🤍";
   const html = layout("Votre rendez-vous est confirmé", rows, extra, link);
-  const text = `${subject}\n\n${rows.map(([k, v]) => `${k} : ${v}`).join("\n")}\n\nMerci d'envoyer une capture d'écran de votre preuve de paiement sur Instagram @${s.instagramHandle}.\nGérer mon rendez-vous : ${link}`;
+  const text = `${subject}\n\n${rows.map(([k, v]) => `${k} : ${v}`).join("\n")}${notesText(notes)}\n\nMerci d'envoyer une capture d'écran de votre preuve de paiement sur Instagram @${s.instagramHandle}.\nGérer mon rendez-vous : ${link}`;
   await sendEmail(b.customer.email, subject, html, text);
 }
 
 export async function sendBookingReminder(b: BookingForEmail) {
   const rows = await bookingRows(b);
   const link = `${SITE_URL()}/rendez-vous/${b.manageToken}`;
+  const notes = importantNotes(b);
   const subject = "Votre rendez-vous approche 🤍";
-  const html = layout("Votre rendez-vous approche", rows, "", link);
-  const text = `${subject}\n\n${rows.map(([k, v]) => `${k} : ${v}`).join("\n")}\n\n${link}`;
+  const html = layout("Votre rendez-vous approche", rows, notesHtml(notes), link);
+  const text = `${subject}\n\n${rows.map(([k, v]) => `${k} : ${v}`).join("\n")}${notesText(notes)}\n\n${link}`;
   await sendEmail(b.customer.email, subject, html, text);
 }
 

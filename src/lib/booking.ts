@@ -8,6 +8,7 @@ import { getSettings, num } from "./settings";
 import { fmtMin, isDateStr, toMin, zonedToUtc } from "./time";
 import { fetchStripeSession } from "./payments/stripe";
 import { sendBookingCancelled, sendBookingConfirmation, sendBookingReminder } from "./email";
+import { sendBookingConfirmationSms, sendBookingReminderSms } from "./sms";
 
 // ───────────── Erreurs métier (messages affichés tels quels à la cliente) ─────────────
 export class BookingError extends Error {
@@ -165,7 +166,11 @@ export async function createPendingBooking(raw: CheckoutInput) {
 }
 
 // ───────────── Paiement ─────────────
-const bookingEmailInclude = { customer: true, options: true } as const;
+const bookingEmailInclude = {
+  customer: true,
+  options: true,
+  service: { select: { infoNotes: true, durationMinutes: true } },
+} as const;
 
 export async function loadForEmail(id: string) {
   return db.booking.findUniqueOrThrow({ where: { id }, include: bookingEmailInclude });
@@ -203,7 +208,9 @@ export async function confirmPayment(paymentId: string, providerRef?: string, pa
   });
 
   if (result.newlyConfirmed) {
-    await sendBookingConfirmation(await loadForEmail(result.bookingId));
+    const booking = await loadForEmail(result.bookingId);
+    await sendBookingConfirmation(booking);
+    await sendBookingConfirmationSms(booking);
   }
   return result;
 }
@@ -349,6 +356,7 @@ export async function sendDueReminders(now = new Date()) {
       continue; // déjà envoyé (contrainte unique)
     }
     await sendBookingReminder(b);
+    await sendBookingReminderSms(b);
     sent++;
   }
   return sent;

@@ -34,6 +34,7 @@ beforeEach(async () => {
   // On conserve les fermetures du seed (période de congés) ; on ne supprime que ce que les tests créent.
   await db.availabilityException.deleteMany({ where: { note: { not: "Indisponible" } } });
   await db.emailLog.deleteMany();
+  await db.smsLog.deleteMany();
   await db.packageVariant.updateMany({ data: { active: true } });
   await db.serviceOption.updateMany({ where: { name: { in: ["Coloration", "Wavy / boucles"] } }, data: { active: true } });
   await db.package.updateMany({ data: { active: true } });
@@ -214,6 +215,20 @@ describe("paiement & webhook", () => {
     const mails = await db.emailLog.findMany();
     expect(mails).toHaveLength(1);
     expect(mails[0].subject).toBe("Votre rendez-vous ESTHAIR & CO. est confirmé 🤍");
+    const sms = await db.smsLog.findMany();
+    expect(sms).toHaveLength(1);
+    expect(sms[0].to).toBe("3246123456");
+    expect(sms[0].body).toContain("est confirmé");
+  });
+
+  it("email de confirmation : reprend les informations importantes de la prestation", async () => {
+    const svc = await db.service.findUniqueOrThrow({ where: { slug: "pose-perruque" } });
+    const b = await createPendingBooking({ type: "SERVICE", itemId: svc.id, optionIds: [], date: await openDate(), startTime: "10:00", customer });
+    await confirmPayment((await pay(b.id)).id);
+    const mail = await db.emailLog.findFirstOrThrow();
+    expect(mail.body).toContain("INFORMATIONS IMPORTANTES");
+    expect(mail.body).toContain("un supplément de 10€ sera ajouté lors du rendez-vous");
+    expect(mail.body).toContain("tête propre et lavée");
   });
 
   it("paiement échoué → la réservation reste PENDING_PAYMENT, aucun email", async () => {
@@ -223,6 +238,7 @@ describe("paiement & webhook", () => {
     expect((await db.payment.findUniqueOrThrow({ where: { id: p.id } })).status).toBe("FAILED");
     expect((await db.booking.findUniqueOrThrow({ where: { id: b.id } })).status).toBe("PENDING_PAYMENT");
     expect(await db.emailLog.count()).toBe(0);
+    expect(await db.smsLog.count()).toBe(0);
   });
 
   it("webhook tardif sur créneau déjà repris → CONFLICT + remboursement à traiter", async () => {
@@ -293,10 +309,14 @@ describe("annulation, déplacement, admin, rappels", () => {
     const b = await book(date, "10:00");
     await confirmPayment((await pay(b.id)).id);
     await db.emailLog.deleteMany();
+    await db.smsLog.deleteMany();
     await db.setting.upsert({ where: { key: "reminderHours" }, update: { value: "400,24" }, create: { key: "reminderHours", value: "400,24" } });
     expect(await sendDueReminders()).toBe(1);
     expect(await sendDueReminders()).toBe(0);
     expect((await db.emailLog.findFirstOrThrow()).subject).toBe("Votre rendez-vous approche 🤍");
+    const sms = await db.smsLog.findMany();
+    expect(sms).toHaveLength(1);
+    expect(sms[0].body).toMatch(/^Rappel ESTHAIR & CO\./);
   });
 
   it("refuse des coordonnées invalides", async () => {

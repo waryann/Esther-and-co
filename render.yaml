@@ -51,6 +51,12 @@ services:
         sync: false
       - key: EMAIL_FROM
         sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: SMS_SENDER
+        value: EsthairCo
+      - key: SMS_DEFAULT_COUNTRY_CODE
+        value: "32"
 
   # Rappels 48 h / 24 h et libération des créneaux verrouillés expirés
   - type: cron

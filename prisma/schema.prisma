@@ -275,6 +275,15 @@ model EmailLog {
   createdAt DateTime @default(now())
 }
 
+model SmsLog {
+  id        String   @id @default(cuid())
+  to        String
+  body      String
+  status    String // SENT | LOGGED | FAILED | SKIPPED
+  error     String   @default("")
+  createdAt DateTime @default(now())
+}
+
 model AnalyticsEvent {
   id        String   @id @default(cuid())
   name      String
