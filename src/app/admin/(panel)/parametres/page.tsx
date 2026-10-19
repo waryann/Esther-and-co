@@ -43,6 +43,7 @@ export default async function SettingsAdmin({ searchParams }: { searchParams: { 
           <TextArea label="Politique de remboursement de l'acompte" name="depositRefundPolicy" defaultValue={s.depositRefundPolicy} rows={3} />
           <TextArea label="Politique de déplacement" name="reschedulePolicy" defaultValue={s.reschedulePolicy} rows={3} />
           <TextArea label="Politique de réservation (ajoutée à l'email de confirmation)" name="bookingPolicy" defaultValue={s.bookingPolicy} rows={3} />
+          <TextArea label="Infos pratiques (ajoutées aux emails de confirmation et de rappel)" name="emailPracticalInfo" defaultValue={s.emailPracticalInfo} rows={12} hint="Adresse, accès, retard, accompagnateurs… Paragraphes séparés par une ligne vide, **gras** possible. Vide = rien n'est ajouté." />
         </Section>
 
         <Section title="Coordonnées" section="contact">

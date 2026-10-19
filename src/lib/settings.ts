@@ -24,6 +24,9 @@ export const SETTING_DEFAULTS = {
   depositRefundPolicy: "",
   reschedulePolicy: "",
   bookingPolicy: "",
+  // Infos pratiques ajoutées aux emails de confirmation et de rappel (texte fourni par ESTHAIR & CO.).
+  emailPracticalInfo:
+    "📍 Adresse : Cypriaan Verhavertstraat 55, 1500 Hal\n🚆 Facilement accessible en train et également en bus depuis la Gare du Midi.\n\n💇🏾‍♀️ Merci de venir avec les cheveux propres et étirés.\n\n⏰ Merci d’arriver à l’heure exacte du rendez-vous, de ne pas sonner avant l’heure.\n\nAu-delà de 30 minutes de retard, le rendez-vous sera automatiquement annulé. En cas d’ajustement de l’horaire, je vous tiendrai bien évidemment au courant.\n\n🚫 **AUCUN ACCOMPAGNATEUR N’EST AUTORISÉ.**\n\nMerci pour votre compréhension 🤍\nÀ très vite ! ✨",
   // Contenus
   heroImage: "",
   heroVideo: "/media/accueil-1.mp4,/media/accueil-2.mp4",

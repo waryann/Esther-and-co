@@ -229,6 +229,9 @@ describe("paiement & webhook", () => {
     expect(mail.body).toContain("INFORMATIONS IMPORTANTES");
     expect(mail.body).toContain("un supplément de 10€ sera ajouté lors du rendez-vous");
     expect(mail.body).toContain("tête propre et lavée");
+    expect(mail.body).toContain("INFOS PRATIQUES");
+    expect(mail.body).toContain("Cypriaan Verhavertstraat 55, 1500 Hal");
+    expect(mail.body).toContain("AUCUN ACCOMPAGNATEUR N’EST AUTORISÉ.");
   });
 
   it("paiement échoué → la réservation reste PENDING_PAYMENT, aucun email", async () => {

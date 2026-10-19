@@ -66,6 +66,20 @@ function notesHtml(notes: string[]) {
   </div>`;
 }
 
+function practicalHtml(info: string) {
+  if (!info.trim()) return "";
+  const paragraphs = info
+    .trim()
+    .split(/\n{2,}/)
+    .map((p) => `<p style="margin:0 0 12px">${escapeHtml(p.trim()).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>")}</p>`)
+    .join("");
+  return `<div style="border-top:1px solid #E6DCCD;margin-top:24px;padding-top:20px;font-size:14px;line-height:1.6;color:#333">
+    <p style="margin:0 0 12px;font-family:Georgia,serif;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#0B0B0B">Infos pratiques</p>${paragraphs}
+  </div>`;
+}
+
+const practicalText = (info: string) => (info.trim() ? `\n\nINFOS PRATIQUES\n${info.trim().replace(/\*\*/g, "")}` : "");
+
 const notesText = (notes: string[]) =>
   notes.length ? `\n\nINFORMATIONS IMPORTANTES\n${notes.map((n) => `- ${n.replace(/\*\*/g, "").replace(/\n/g, " ")}`).join("\n")}` : "";
 
@@ -105,24 +119,25 @@ export async function sendBookingConfirmation(b: BookingForEmail) {
   const rows = await bookingRows(b);
   const link = `${SITE_URL()}/rendez-vous/${b.manageToken}`;
   const notes = importantNotes(b);
-  const extra = `${notesHtml(notes)}<p style="font-size:14px;line-height:1.6;color:#333;margin-top:20px">Merci d'envoyer une capture d'écran de votre preuve de paiement sur Instagram <b>@${s.instagramHandle}</b> afin que nous puissions garder une trace de votre paiement.</p>${
+  const extra = `${notesHtml(notes)}${practicalHtml(s.emailPracticalInfo)}<p style="font-size:14px;line-height:1.6;color:#333;margin-top:20px">Merci d'envoyer une capture d'écran de votre preuve de paiement sur Instagram <b>@${s.instagramHandle}</b> afin que nous puissions garder une trace de votre paiement.</p>${
     s.bookingPolicy
       ? `<p style="font-size:13px;line-height:1.6;color:#555"><b>Politique de réservation :</b> ${s.bookingPolicy}</p>`
       : ""
   }`;
   const subject = "Votre rendez-vous ESTHAIR & CO. est confirmé 🤍";
   const html = layout("Votre rendez-vous est confirmé", rows, extra, link);
-  const text = `${subject}\n\n${rows.map(([k, v]) => `${k} : ${v}`).join("\n")}${notesText(notes)}\n\nMerci d'envoyer une capture d'écran de votre preuve de paiement sur Instagram @${s.instagramHandle}.\nGérer mon rendez-vous : ${link}`;
+  const text = `${subject}\n\n${rows.map(([k, v]) => `${k} : ${v}`).join("\n")}${notesText(notes)}${practicalText(s.emailPracticalInfo)}\n\nMerci d'envoyer une capture d'écran de votre preuve de paiement sur Instagram @${s.instagramHandle}.\nGérer mon rendez-vous : ${link}`;
   await sendEmail(b.customer.email, subject, html, text);
 }
 
 export async function sendBookingReminder(b: BookingForEmail) {
   const rows = await bookingRows(b);
   const link = `${SITE_URL()}/rendez-vous/${b.manageToken}`;
+  const s = await getSettings();
   const notes = importantNotes(b);
   const subject = "Votre rendez-vous approche 🤍";
-  const html = layout("Votre rendez-vous approche", rows, notesHtml(notes), link);
-  const text = `${subject}\n\n${rows.map(([k, v]) => `${k} : ${v}`).join("\n")}${notesText(notes)}\n\n${link}`;
+  const html = layout("Votre rendez-vous approche", rows, notesHtml(notes) + practicalHtml(s.emailPracticalInfo), link);
+  const text = `${subject}\n\n${rows.map(([k, v]) => `${k} : ${v}`).join("\n")}${notesText(notes)}${practicalText(s.emailPracticalInfo)}\n\n${link}`;
   await sendEmail(b.customer.email, subject, html, text);
 }
 
