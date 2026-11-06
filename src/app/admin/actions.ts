@@ -12,6 +12,7 @@ import { saveImage, UploadError } from "@/lib/upload";
 import { SETTING_DEFAULTS, setSetting, type SettingKey } from "@/lib/settings";
 import { addDays, isDateStr, toMin } from "@/lib/time";
 import { isIntervalFree } from "@/lib/availability";
+import { rotateFeedToken } from "@/lib/calendar-feed";
 import { BookingError, cancelBooking, createAdminBooking, reconcileStripePayment, rescheduleBooking } from "@/lib/booking";
 
 const go = (path: string, msg?: string, error?: string): never => {
@@ -487,5 +488,13 @@ export async function verifyPaymentWithStripe(fd: FormData) {
     const r = await reconcileStripePayment(str(fd, "id"));
     revalidatePath("/admin", "layout");
     return r === "PAID" ? "Paiement confirmé par Stripe : réservation confirmée." : r === "FAILED" ? "Stripe indique que ce paiement a échoué ou expiré." : "Stripe indique que ce paiement n'est pas (encore) réglé.";
+  });
+}
+
+// ───────────────────────── Synchronisation calendrier ─────────────────────────
+export async function rotateCalendarFeed() {
+  return safe("/admin/calendrier", async () => {
+    await rotateFeedToken();
+    return "Nouveau lien généré : l'ancien ne fonctionne plus. Réabonnez votre téléphone avec le nouveau lien.";
   });
 }

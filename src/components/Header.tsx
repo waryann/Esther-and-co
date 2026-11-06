@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import {
   BookOpen, CalendarCheck, Home, Info, Mail, Menu, Package, Scissors, ShoppingBag, Star, X, HelpCircle,
 } from "lucide-react";
-import { InstagramIcon, TikTokIcon } from "./Icons";
+import { BrandAmp, InstagramIcon, TikTokIcon } from "./Icons";
 import { useBooking } from "./BookingProvider";
 
 const MENU = [
@@ -80,7 +80,7 @@ export function Header({ instagram, tiktok, email }: { instagram: string; tiktok
             href="/"
             className="font-serif text-[15px] uppercase tracking-[0.14em] max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2 md:text-[19px]"
           >
-            ESTHAIR &amp; CO.
+            ESTHAIR <BrandAmp /> CO.
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
             {DESKTOP.map((l) => (
@@ -99,7 +99,7 @@ export function Header({ instagram, tiktok, email }: { instagram: string; tiktok
       {open && (
         <div className={`fixed inset-0 z-50 overflow-y-auto bg-ink text-white transition-all duration-[260ms] ${closing ? "opacity-0 -translate-y-2" : "animate-fade-in"}`} role="dialog" aria-modal="true">
           <div className="container-page flex h-[58px] items-center justify-between md:h-[68px]">
-            <span className="font-serif text-[17px] uppercase tracking-[0.14em]">ESTHAIR &amp; CO.</span>
+            <span className="font-serif text-[17px] uppercase tracking-[0.14em]">ESTHAIR <BrandAmp /> CO.</span>
             <button aria-label="Fermer le menu" onClick={close} className="-mr-2 flex h-10 w-10 items-center justify-center transition-transform duration-300 hover:rotate-90">
               <X size={24} strokeWidth={1.4} />
             </button>

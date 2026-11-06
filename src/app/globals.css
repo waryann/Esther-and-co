@@ -63,3 +63,17 @@ video::-webkit-media-controls-start-playback-button { display: none !important; 
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1 !important; transform: none !important; }
 }
+
+/* Neige de bienvenue (ChristmasWelcome) */
+.xmas-flake {
+  transform: translateY(-5vh);
+  animation-name: xmas-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  filter: drop-shadow(0 0 2px rgba(138, 110, 82, 0.55));
+  opacity: 0.9;
+}
+@keyframes xmas-fall {
+  from { transform: translate3d(0, -5vh, 0) rotate(0deg); }
+  to { transform: translate3d(var(--drift, 0), 105vh, 0) rotate(240deg); }
+}

@@ -2,7 +2,10 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { DAYS_SHORT_FR, MONTHS_FR, addDays, daysInMonth, fmtMin, formatDateFr, isDateStr, nowInTz, pad, weekdayOf } from "@/lib/time";
-import { PageHead, STATUS_LABEL } from "@/components/admin/ui";
+import { Card, Flash, PageHead, STATUS_LABEL, Submit } from "@/components/admin/ui";
+import { CopyButton } from "@/components/admin/CopyButton";
+import { feedUrls, getFeedToken } from "@/lib/calendar-feed";
+import { rotateCalendarFeed } from "@/app/admin/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +19,7 @@ const COLORS: Record<string, string> = {
 
 const PX = 56; // hauteur d'une heure
 
-export default async function CalendarPage({ searchParams }: { searchParams: { view?: string; date?: string } }) {
+export default async function CalendarPage({ searchParams }: { searchParams: { view?: string; date?: string; msg?: string; error?: string } }) {
   const s = await getSettings();
   const today = nowInTz(s.timezone).date;
   const view = ["day", "week", "month"].includes(searchParams.view ?? "") ? (searchParams.view as "day" | "week" | "month") : "week";
@@ -41,6 +44,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: { v
     next = addDays(to, 1);
     title = `${MONTHS_FR[m - 1]} ${y}`;
   }
+
+  const feed = feedUrls(await getFeedToken());
 
   const [bookings, blocked, hours, exceptions] = await Promise.all([
     db.booking.findMany({
@@ -71,6 +76,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: { v
 
   return (
     <>
+      <Flash msg={searchParams.msg} error={searchParams.error} />
       <PageHead
         title="Calendrier"
         sub={title}
@@ -154,6 +160,28 @@ export default async function CalendarPage({ searchParams }: { searchParams: { v
         </div>
       )}
       <p className="mt-3 text-[12px] text-[#888]">Cliquez sur un rendez-vous pour ouvrir sa fiche. Les créneaux en attente de paiement (verrouillés) apparaissent en orange.</p>
+
+      <Card title="Synchroniser avec mon téléphone" className="mt-8">
+        <p className="max-w-2xl text-[13.5px] leading-relaxed">
+          Abonnez le calendrier de votre téléphone à vos rendez-vous : chaque réservation confirmée y apparaît automatiquement
+          (avec le nom, le téléphone de la cliente et la prestation), avec un rappel 1 h avant. Les annulations et reports se mettent à jour tout seuls.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <a href={feed.webcal} className="bg-ink px-5 py-2.5 text-[12px] font-medium uppercase tracking-[0.12em] text-white hover:bg-[#222]">iPhone / iPad / Mac</a>
+          <a href={feed.google} target="_blank" rel="noreferrer" className="border border-ink bg-white px-5 py-2.5 text-[12px] font-medium uppercase tracking-[0.12em] hover:bg-sand/40">Google Agenda (Android)</a>
+          <CopyButton text={feed.https} />
+        </div>
+        <ul className="mt-5 space-y-1.5 text-[12.5px] text-taupe">
+          <li><b className="text-ink">iPhone :</b> ouvrez ce dashboard sur l&apos;iPhone, touchez « iPhone / iPad / Mac » puis « S&apos;abonner ».</li>
+          <li><b className="text-ink">Android :</b> touchez « Google Agenda » (connecté au même compte Google que le téléphone) puis « Ajouter ». Le calendrier apparaît ensuite dans l&apos;app Google Agenda.</li>
+          <li><b className="text-ink">Autre application :</b> copiez le lien et ajoutez-le comme « calendrier par URL / abonnement ».</li>
+          <li>La mise à jour se fait automatiquement (selon le téléphone : de quelques minutes à quelques heures pour Google).</li>
+        </ul>
+        <form action={rotateCalendarFeed} className="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-4">
+          <Submit danger className="!px-4 !py-2 !text-[11px]">Régénérer le lien</Submit>
+          <span className="text-[12px] text-[#888]">Ce lien est privé : ne le partagez pas. En cas de doute (téléphone perdu…), régénérez-le, puis réabonnez votre téléphone.</span>
+        </form>
+      </Card>
     </>
   );
 }

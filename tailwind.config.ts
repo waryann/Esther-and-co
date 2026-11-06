@@ -24,6 +24,8 @@ const config: Config = {
         pop: { "0%": { opacity: "0", transform: "scale(.94)" }, "100%": { opacity: "1", transform: "scale(1)" } },
         slideIn: { from: { opacity: "0", transform: "translateX(-16px)" }, to: { opacity: "1", transform: "none" } },
         drop: { from: { opacity: "0", transform: "translateY(-10px)" }, to: { opacity: "1", transform: "none" } },
+        sway: { "0%,100%": { transform: "translateX(-42%) rotate(-12deg)" }, "50%": { transform: "translateX(-42%) rotate(-4deg)" } },
+        xmasHello: { "0%": { opacity: "0", transform: "translateY(-8px) scale(.96)" }, "15%,75%": { opacity: "1", transform: "none" }, "100%": { opacity: "0", transform: "translateY(-6px)" } },
         checkPop: { "0%": { transform: "scale(.4)", opacity: "0" }, "60%": { transform: "scale(1.12)", opacity: "1" }, "100%": { transform: "scale(1)" } },
       },
       animation: {
@@ -33,6 +35,8 @@ const config: Config = {
         "slide-in": "slideIn .5s cubic-bezier(.22,1,.36,1) both",
         drop: "drop .45s cubic-bezier(.22,1,.36,1) both",
         "check-pop": "checkPop .6s cubic-bezier(.22,1,.36,1) .15s both",
+        sway: "sway 3.2s ease-in-out infinite",
+        "xmas-hello": "xmasHello 4.2s ease-out .4s both",
       },
     },
   },

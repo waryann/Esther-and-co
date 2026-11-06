@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { InstagramIcon, TikTokIcon } from "./Icons";
+import { BrandAmp, InstagramIcon, TikTokIcon } from "./Icons";
 import { getSettings } from "@/lib/settings";
 
 export async function Footer() {
@@ -8,7 +8,7 @@ export async function Footer() {
     <footer className="mt-20 border-t border-line bg-cream">
       <div className="container-page grid gap-8 py-10 md:grid-cols-3">
         <div>
-          <div className="font-serif text-lg uppercase tracking-[0.14em]">ESTHAIR &amp; CO.</div>
+          <div className="font-serif text-lg uppercase tracking-[0.14em]">ESTHAIR <BrandAmp /> CO.</div>
           <p className="mt-2 text-[13px] text-taupe">{s.tagline}</p>
           <div className="mt-4 flex items-center gap-4 text-ink">
             <a href={`https://instagram.com/${s.instagramHandle}`} target="_blank" rel="noreferrer" aria-label="Instagram"><InstagramIcon size={19} /></a>

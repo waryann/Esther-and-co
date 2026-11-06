@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NewsletterPopup } from "@/components/NewsletterPopup";
+import { ChristmasWelcome } from "@/components/ChristmasWelcome";
 import { getSettings } from "@/lib/settings";
 
 // Les pages lisent la base (réglages, catalogue) : jamais pré-générées au build.
@@ -14,6 +15,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <main className="min-h-[60vh]">{children}</main>
       <Footer />
       {s.newsletterPopupEnabled === "true" && <NewsletterPopup />}
+      <ChristmasWelcome />
     </>
   );
 }

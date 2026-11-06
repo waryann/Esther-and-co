@@ -20,7 +20,7 @@ export function NewsletterPopup() {
     } catch {
       return;
     }
-    const t = setTimeout(() => setOpen(true), 1800);
+    const t = setTimeout(() => setOpen(true), 7500); // après la neige de bienvenue (ChristmasWelcome)
     return () => clearTimeout(t);
   }, [quiet]);
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Award, ChevronDown, Globe, Heart, Star } from "lucide-react";
 import { Photo } from "@/components/Photo";
 import { HeroVideo } from "@/components/HeroVideo";
+import { BrandAmp } from "@/components/Icons";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { PageView } from "@/components/PageView";
 import { Reveal } from "@/components/Reveal";
@@ -33,7 +34,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/70" />
           <div className="absolute inset-x-0 bottom-0 flex flex-col items-center px-6 pb-8 text-center text-white md:pb-10">
             <h1 style={{ animationDelay: "250ms" }} className="animate-fade-up font-serif text-[34px] font-light uppercase leading-none tracking-[0.06em] min-[400px]:text-[40px] sm:text-[56px] md:text-[84px]">
-              ESTHAIR <span className="font-normal">&amp;</span> CO.
+              ESTHAIR <BrandAmp className="font-normal" /> CO.
             </h1>
             <p style={{ animationDelay: "550ms" }} className="mt-3 animate-fade-up text-[11px] font-light uppercase tracking-[0.3em] md:mt-5 md:text-[14px]">{s.tagline}</p>
             <Link href="/reservation" style={{ animationDelay: "850ms" }} className="btn-tan btn-auto mt-7 animate-fade-up !px-9">
