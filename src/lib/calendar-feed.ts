@@ -78,6 +78,7 @@ export async function buildFeed(): Promise<string> {
 
   for (const b of bookings) {
     const item = b.variantLabel ? `${b.itemName} (${b.variantLabel})` : b.itemName;
+    const extras = b.options.map((o) => ` + ${o.name}`).join("");
     const desc = [
       `Réf. ${b.reference}`,
       `Cliente : ${b.customer.name}`,
@@ -98,7 +99,7 @@ export async function buildFeed(): Promise<string> {
       `LAST-MODIFIED:${stamp(b.updatedAt)}`,
       `DTSTART:${stamp(zonedToUtc(b.date, b.startMin, s.timezone))}`,
       `DTEND:${stamp(zonedToUtc(b.date, b.endMin, s.timezone))}`,
-      `SUMMARY:${esc(`${b.status === "CONFLICT" ? "⚠ " : ""}${b.customer.name} — ${item}`)}`,
+      `SUMMARY:${esc(`${b.status === "CONFLICT" ? "⚠ " : ""}${b.customer.name} — ${item}${extras}`)}`,
       `DESCRIPTION:${esc(desc.join("\n"))}`,
       ...(s.address ? [`LOCATION:${esc(s.address)}`] : []),
       `URL:${SITE_URL()}/admin/rendez-vous/${b.id}`,

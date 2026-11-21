@@ -369,6 +369,14 @@ async function main() {
     await db.serviceOption.updateMany({ where: { name: { in: ["Coupe", "Soin profond", "Baby hair"] } }, data: { active: false } });
   });
 
+  // Demande d'Esther (21/11/2026) : la coloration aussi sur les prestations (option séparée, prix modifiable dans l'admin).
+  await applyOnce("colorationServices", async () => {
+    const pack = await db.serviceOption.findFirst({ where: { name: "Coloration" } });
+    await db.serviceOption.create({
+      data: { name: "Coloration", description: "Ajouter une coloration", priceModifier: 50, icon: "droplet", scope: "SERVICE", sortOrder: pack?.sortOrder ?? 1 },
+    });
+  });
+
   // ── Réglages par défaut ──
   await db.setting.upsert({ where: { key: "bookingCounter" }, update: {}, create: { key: "bookingCounter", value: "1000" } });
 

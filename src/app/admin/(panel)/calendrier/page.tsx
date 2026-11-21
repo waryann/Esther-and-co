@@ -53,7 +53,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: { v
         date: { gte: from, lte: to },
         OR: [{ status: { in: ["CONFIRMED", "COMPLETED", "NO_SHOW", "CONFLICT"] } }, { status: "PENDING_PAYMENT", lockExpiresAt: { gt: new Date() } }],
       },
-      include: { customer: true },
+      include: { customer: true, options: true },
       orderBy: { startMin: "asc" },
     }),
     db.blockedSlot.findMany({ where: { date: { gte: from, lte: to } } }),
@@ -149,6 +149,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: { v
                       >
                         <b>{b.startTime}</b> {b.customer.name}
                         <div className="truncate">{b.itemName}</div>
+                        {b.options.length > 0 && <div className="truncate font-semibold">+ {b.options.map((o) => o.name).join(", ")}</div>}
                         <div className="text-[10px] opacity-75">{STATUS_LABEL[b.status]}</div>
                       </Link>
                     ))}

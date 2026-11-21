@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function ServicePage({ params }: { params: { slug: string } }) {
   const [svc, options] = await Promise.all([getServiceBySlug(params.slug), getOptionsFor("SERVICE")]);
   if (!svc) notFound();
+  const coloration = options.find((o) => o.name.toLowerCase().startsWith("coloration"));
   return (
     <>
       <PageView event="page_view" props={{ page: "service", slug: svc.slug }} />
@@ -35,7 +36,7 @@ export default async function ServicePage({ params }: { params: { slug: string }
         variants={[]}
         basePrice={svc.price}
         priceFrom={svc.priceFrom}
-        coloration={null}
+        coloration={coloration ? { id: coloration.id, price: coloration.priceModifier } : null}
         hasOptions={options.length > 0}
       />
     </>
